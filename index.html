@@ -16,7 +16,19 @@
       justify-content: center;
       align-items: center;
       padding: 20px;
+      position: relative;
     }
+
+    #bgVideo {
+  position: fixed;
+  top: 0; 
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -1; /* Derrière tout le contenu */
+}
+
     .container {
       max-width: 480px;
       width: 100%;
@@ -91,9 +103,56 @@
       margin-top: 10px;
       font-weight: bold;
     }
+
+    /* Menu déroulant */
+    .menu-toggle {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      font-size: 24px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: 60px;
+      left: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(6px);
+      border-radius: 8px;
+      padding: 10px 0;
+      display: none;
+      flex-direction: column;
+      min-width: 150px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+    .dropdown-menu a {
+      color: white;
+      padding: 10px 15px;
+      text-decoration: none;
+      display: block;
+      font-size: 16px;
+    }
+    .dropdown-menu a:hover {
+      background: rgba(255, 255, 255, 0.25);
+    }
   </style>
 </head>
 <body>
+    <video autoplay muted loop playsinline id="bgVideo">
+        <source src="https://cdn.pixabay.com/video/2016/02/13/2142-155246338_large.mp4" type="video/mp4">
+        Votre navigateur ne supporte pas la vidéo HTML5.
+      </video>
+      
+  <!-- MENU DEROULANT -->
+  <div class="menu-toggle" onclick="toggleMenu()">☰</div>
+  <div class="dropdown-menu" id="dropdownMenu">
+    <a href="support.html">🛠️ Support</a>
+    <a href="dev.html">👨‍💻 Le développeur</a>
+    <a href="update.html">🔄 Mise à jour</a>
+  </div>  
+
+  <!-- CONTENU PRINCIPAL -->
   <div class="container">
     <h1 id="city">Veuillez saisir une ville</h1>
     <div class="temp" id="temp">--°</div>
@@ -120,6 +179,103 @@
       </div>
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <!-- JS DU MENU -->
+  <script>
+    function toggleMenu() {
+      const menu = document.getElementById("dropdownMenu");
+      menu.style.display = menu.style.display === "flex" ? "none" : "flex";
+    }
+    document.addEventListener("click", function(e) {
+      const menu = document.getElementById("dropdownMenu");
+      const toggle = document.querySelector(".menu-toggle");
+      if (!menu.contains(e.target) && !toggle.contains(e.target)) {
+        menu.style.display = "none";
+      }
+    });
+  </script>
+
+  <!-- JS METEO -->
+  <script>
+    const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
+    const elements = {
+      city: document.getElementById("city"),
+      temp: document.getElementById("temp"),
+      desc: document.getElementById("desc"),
+      wind: document.getElementById("wind"),
+      humidity: document.getElementById("humidity"),
+      error: document.getElementById("error"),
+      villeInput: document.getElementById("ville"),
+      btnChercher: document.getElementById("btnChercher"),
+      forecast24h: document.getElementById("forecast24h"),
+    };
+
+    function degToDirection(deg) {
+      const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+      return directions[Math.round(deg / 45) % 8];
+    }
+
+    function formatHour(timestamp, timezoneOffset) {
+      const date = new Date((timestamp + timezoneOffset) * 1000);
+      return date.getUTCHours() + "h";
+    }
+
+    async function fetchWeatherData(ville) {
+      if (!ville) {
+        elements.error.textContent = "Merci de saisir une ville";
+        return;
+      }
+      elements.error.textContent = "";
+      elements.forecast24h.innerHTML = "Chargement...";
+
+      try {
+        const responseWeather = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ville)}&appid=${API_KEY}&units=metric&lang=fr`);
+        if (!responseWeather.ok) throw new Error("Ville non trouvée ou clé invalide");
+        const dataWeather = await responseWeather.json();
+
+        elements.city.textContent = dataWeather.name;
+        elements.temp.textContent = `${Math.round(dataWeather.main.temp)}°C`;
+        elements.desc.textContent = dataWeather.weather[0].description;
+        const speedKmh = (dataWeather.wind.speed * 3.6).toFixed(1);
+        const direction = degToDirection(dataWeather.wind.deg);
+        elements.wind.textContent = `${speedKmh} km/h ${direction}`;
+        elements.humidity.textContent = dataWeather.main.humidity + "%";
+
+        const responseForecast = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(ville)}&appid=${API_KEY}&units=metric&lang=fr`);
+        if (!responseForecast.ok) throw new Error("Erreur récupération prévisions");
+        const dataForecast = await responseForecast.json();
+
+        elements.forecast24h.innerHTML = "";
+        const timezoneOffset = dataForecast.city.timezone;
+
+        dataForecast.list.slice(0, 8).forEach(item => {
+          const hour = formatHour(item.dt, timezoneOffset);
+          const icon = item.weather[0].icon;
+          const temp = Math.round(item.main.temp);
+          const div = document.createElement("div");
+          div.className = "forecast-item";
+          div.innerHTML = `
+            ${hour}<br>
+            <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt=""><br>
+            ${temp}°
+          `;
+          elements.forecast24h.appendChild(div);
+        });
+
+      } catch (err) {
+        elements.error.textContent = "Erreur : " + err.message;
+        elements.city.textContent = "Ville introuvable";
+        elements.temp.textContent = "--°";
+        elements.desc.textContent = "---";
+        elements.wind.textContent = "---";
+        elements.humidity.textContent = "--%";
+        elements.forecast24h.innerHTML = "---";
+      }
+    }
+
+    elements.btnChercher.addEventListener("click", () => {
+      fetchWeatherData(elements.villeInput.value.trim());
+    });
+  </script>
 </body>
 </html>
