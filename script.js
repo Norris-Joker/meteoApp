@@ -1,86 +1,92 @@
 const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
 
-function getWeatherByCoords(lat, lon) {
-  console.log("Recherche météo aux coords :", lat, lon);
+const elements = {
+  city: document.getElementById("city"),
+  temp: document.getElementById("temp"),
+  desc: document.getElementById("desc"),
+  wind: document.getElementById("wind"),
+  humidity: document.getElementById("humidity"),
+  error: document.getElementById("error"),
+  villeInput: document.getElementById("ville"),
+  btnChercher: document.getElementById("btnChercher"),
+  forecast24h: document.getElementById("forecast24h"),
+};
 
-  fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Erreur API météo actuelle: ${res.status}`);
-      return res.json();
-    })
-    .then(current => {
-      console.log("Météo actuelle reçue :", current);
-      document.getElementById("city").textContent = current.name;
-      document.getElementById("temp").textContent = `${Math.round(current.main.temp)}°`;
-      document.getElementById("desc").textContent = current.weather[0].description;
-      document.getElementById("humidity").textContent = `${current.main.humidity}%`;
-      document.getElementById("pressure").textContent = `${current.main.pressure} hPa`;
-      document.getElementById("wind").textContent = `${(current.wind.speed * 3.6).toFixed(1)} km/h`;
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("desc").textContent = "Erreur lors du chargement de la météo.";
-    });
-
-  fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Erreur API prévisions: ${res.status}`);
-      return res.json();
-    })
-    .then(forecast => {
-      console.log("Prévisions reçues :", forecast);
-      const forecastEl = document.getElementById("forecast");
-      forecastEl.innerHTML = "";
-      forecast.list.slice(0, 5).forEach(item => {
-        const hour = new Date(item.dt * 1000).getHours();
-        const block = document.createElement("div");
-        block.className = "item";
-        block.innerHTML = `
-          ${hour}h<br>
-          <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}"><br>
-          ${Math.round(item.main.temp)}°
-        `;
-        forecastEl.appendChild(block);
-      });
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("forecast").textContent = "Prévisions indisponibles.";
-    });
+function degToDirection(deg) {
+  const directions = ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+  return directions[Math.round(deg / 45) % 8];
 }
 
-function getWeatherFallback(city = "Givors") {
-  console.log("Chargement fallback météo pour la ville :", city);
-  fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=fr&appid=${API_KEY}`)
-    .then(res => {
-      if (!res.ok) throw new Error(`Erreur API fallback météo: ${res.status}`);
-      return res.json();
-    })
-    .then(data => {
-      getWeatherByCoords(data.coord.lat, data.coord.lon);
-    })
-    .catch(err => {
-      console.error(err);
-      document.getElementById("desc").textContent = "Impossible de récupérer la météo.";
-    });
+function formatHour(timestamp, timezoneOffset) {
+  const date = new Date((timestamp + timezoneOffset) * 1000);
+  return date.getUTCHours() + "h";
 }
 
-function initWeatherApp() {
-  if ("geolocation" in navigator) {
-    navigator.geolocation.getCurrentPosition(
-      position => {
-        console.log("Position obtenue :", position.coords.latitude, position.coords.longitude);
-        getWeatherByCoords(position.coords.latitude, position.coords.longitude);
-      },
-      error => {
-        console.warn("Localisation refusée ou indisponible, chargement de Givors");
-        getWeatherFallback("Givors");
-      }
-    );
-  } else {
-    console.warn("Géolocalisation non supportée");
-    getWeatherFallback("Givors");
+async function fetchWeatherData(ville) {
+  if (!ville) {
+    elements.error.textContent = "Merci de saisir une ville";
+    return;
+  }
+  elements.error.textContent = "";
+  elements.forecast24h.innerHTML = "Chargement...";
+
+  try {
+    // Données météo actuelles
+    const responseWeather = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ville)}&appid=${API_KEY}&units=metric&lang=fr`);
+    if (!responseWeather.ok) throw new Error("Ville non trouvée");
+    const dataWeather = await responseWeather.json();
+
+    elements.city.textContent = dataWeather.name;
+    elements.temp.textContent = `${Math.round(dataWeather.main.temp)}°C`;
+    elements.desc.textContent = dataWeather.weather[0].description;
+
+    const speedKmh = (dataWeather.wind.speed * 3.6).toFixed(1);
+    const direction = degToDirection(dataWeather.wind.deg);
+    elements.wind.textContent = `${speedKmh} km/h ${direction}`;
+    elements.humidity.textContent = dataWeather.main.humidity + "%";
+
+    // Prévisions 24h (3h x 8)
+    const responseForecast = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(ville)}&appid=${API_KEY}&units=metric&lang=fr`);
+    if (!responseForecast.ok) throw new Error("Erreur prévisions");
+    const dataForecast = await responseForecast.json();
+
+    const timezoneOffset = dataForecast.city.timezone;
+    elements.forecast24h.innerHTML = "";
+
+    dataForecast.list.slice(0, 8).forEach(item => {
+      const hour = formatHour(item.dt, timezoneOffset);
+      const icon = item.weather[0].icon;
+      const temp = Math.round(item.main.temp);
+
+      const forecastItem = document.createElement("div");
+      forecastItem.className = "forecast-item";
+      forecastItem.innerHTML = `
+        ${hour}<br>
+        <img src="https://openweathermap.org/img/wn/${icon}@2x.png" alt="" /><br>
+        ${temp}°
+      `;
+      elements.forecast24h.appendChild(forecastItem);
+    });
+
+  } catch (err) {
+    elements.error.textContent = "Erreur : " + err.message;
+    elements.city.textContent = "Ville introuvable";
+    elements.temp.textContent = "--°";
+    elements.desc.textContent = "---";
+    elements.wind.textContent = "---";
+    elements.humidity.textContent = "--%";
+    elements.forecast24h.innerHTML = "---";
   }
 }
 
-window.onload = initWeatherApp;
+// ▶ Clique bouton
+elements.btnChercher.addEventListener("click", () => {
+  fetchWeatherData(elements.villeInput.value.trim());
+});
+
+// ▶ Touche Entrée
+elements.villeInput.addEventListener("keydown", (e) => {
+  if (e.key === "Enter") {
+    fetchWeatherData(elements.villeInput.value.trim());
+  }
+});
