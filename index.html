@@ -177,18 +177,20 @@
   </div>
   
 
-  <!-- Contenu -->
-  <div class="container" id="meteo">
+  <!-- Contenu principal -->
+<div class="container" id="meteo">
     <h1>🌤️ Météo Express</h1>
     <p class="sous-titre">Recherchez la météo dans votre ville</p>
-
+  
     <div class="input-group">
       <input type="text" id="ville" placeholder="Ex : Paris, Lyon, Marseille" autocomplete="off" />
       <button onclick="getMeteo()">🔍</button>
     </div>
-
-    <div id="resultat" class="resultat"></div>
   </div>
+  
+  <!-- Résultat météo affiché même sans le fond blanc -->
+  <div id="resultat" class="resultat"></div>
+  
 
   <!-- Ancres -->
   <div id="developpeur" style="display:none;">Développeur : Ton nom ici</div>
