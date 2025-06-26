@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Météo Givors</title>
+  <title>Météo Mobile</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -57,7 +57,7 @@
 </head>
 <body>
   <div class="container">
-    <h1 id="city">Givors</h1>
+    <h1 id="city">Chargement...</h1>
     <div class="temp" id="temp">--°</div>
     <div class="description" id="desc">Chargement...</div>
 
@@ -78,42 +78,65 @@
 
   <script>
     const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
-    const city = "Givors";
 
-    async function loadWeather() {
-      try {
-        const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=fr&appid=${API_KEY}`);
-        const current = await currentRes.json();
-
-        const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&lang=fr&appid=${API_KEY}`);
-        const forecast = await forecastRes.json();
-
-        document.getElementById("temp").textContent = `${Math.round(current.main.temp)}°`;
-        document.getElementById("desc").textContent = current.weather[0].description;
-        document.getElementById("humidity").textContent = `${current.main.humidity}%`;
-        document.getElementById("pressure").textContent = `${current.main.pressure} hPa`;
-        document.getElementById("wind").textContent = `${(current.wind.speed * 3.6).toFixed(1)} km/h`;
-
-        const forecastEl = document.getElementById("forecast");
-        forecastEl.innerHTML = "";
-        forecast.list.slice(0, 5).forEach(item => {
-          const hour = new Date(item.dt * 1000).getHours();
-          const block = document.createElement("div");
-          block.className = "item";
-          block.innerHTML = `
-            ${hour}h<br>
-            <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"><br>
-            ${Math.round(item.main.temp)}°
-          `;
-          forecastEl.appendChild(block);
+    function getWeatherByCoords(lat, lon) {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`)
+        .then(res => res.json())
+        .then(current => {
+          document.getElementById("city").textContent = current.name;
+          document.getElementById("temp").textContent = `${Math.round(current.main.temp)}°`;
+          document.getElementById("desc").textContent = current.weather[0].description;
+          document.getElementById("humidity").textContent = `${current.main.humidity}%`;
+          document.getElementById("pressure").textContent = `${current.main.pressure} hPa`;
+          document.getElementById("wind").textContent = `${(current.wind.speed * 3.6).toFixed(1)} km/h`;
         });
-      } catch (e) {
-        document.getElementById("desc").textContent = "Erreur de chargement météo.";
-        console.error(e);
+
+      fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`)
+        .then(res => res.json())
+        .then(forecast => {
+          const forecastEl = document.getElementById("forecast");
+          forecastEl.innerHTML = "";
+          forecast.list.slice(0, 5).forEach(item => {
+            const hour = new Date(item.dt * 1000).getHours();
+            const block = document.createElement("div");
+            block.className = "item";
+            block.innerHTML = `
+              ${hour}h<br>
+              <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"><br>
+              ${Math.round(item.main.temp)}°
+            `;
+            forecastEl.appendChild(block);
+          });
+        });
+    }
+
+    function getWeatherFallback(city = "Givors") {
+      fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=fr&appid=${API_KEY}`)
+        .then(res => res.json())
+        .then(data => getWeatherByCoords(data.coord.lat, data.coord.lon))
+        .catch(() => {
+          document.getElementById("desc").textContent = "Impossible de récupérer la météo.";
+        });
+    }
+
+    function initWeatherApp() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(
+          position => {
+            getWeatherByCoords(position.coords.latitude, position.coords.longitude);
+          },
+          error => {
+            console.warn("Localisation refusée, chargement de Givors");
+            getWeatherFallback("Givors");
+          }
+        );
+      } else {
+        console.warn("Géolocalisation non supportée");
+        getWeatherFallback("Givors");
       }
     }
 
-    loadWeather();
+    initWeatherApp();
   </script>
 </body>
 </html>
