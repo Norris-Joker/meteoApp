@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mises à jour - Météo Mobile</title>
+  <style>
+    /* Fond météo */
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+      min-height: 100vh;
+      background: url('https://www.francebleu.fr/s3/cruiser-production/2023/06/f21ac4df-5c79-4db6-9152-9b59aaa87aeb/1200x680_sc_gettyimages-1435906430.jpg') no-repeat center center fixed;
+      background-size: cover;
+      position: relative;
+    }
+    /* Overlay semi-transparent pour améliorer la lisibilité */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: rgba(255, 255, 255, 0.7);
+      z-index: -1;
+    }
+
+    /* Bouton retour */
+    .btn-retour {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #2874f0;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: background-color 0.3s ease;
+    z-index: 1001;
+    }
+
+    .btn-retour:hover {
+       background-color: #1b4ec8;
+    }
+
+    h1 {
+      text-align: center;
+      color: #2874f0;
+      margin-bottom: 30px;
+    }
+    .update-list {
+      max-width: 600px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .update-item {
+      border-bottom: 1px solid #ddd;
+      padding: 15px 0;
+    }
+    .update-item:last-child {
+      border-bottom: none;
+    }
+    .version {
+      font-weight: bold;
+      color: #1a4f9c;
+      font-size: 1.1em;
+    }
+    .date {
+      font-size: 0.9em;
+      color: #666;
+      margin-left: 10px;
+    }
+    .description {
+      margin-top: 8px;
+      line-height: 1.4;
+    }
+  </style>
+</head>
+<body>
+  <button class="btn-retour" onclick="window.location.href='index.html'">← Retour</button>
+  
+  <h1>Mises à jour de Météo Mobile</h1>
+  <div class="update-list">
+    <div class="update-item">
+      <div><span class="version">v1.1.0</span><span class="date">- 26 Juin 2025</span></div>
+      <div class="description">
+        Fonctionnalité de recherche de la météo par ville ajoutée.<br />
+        Affichage des conditions météo actuelles et prévisions simplifiées.
+      </div>
+    </div>
+    <div class="update-item">
+      <div><span class="version">v1.0.0</span><span class="date">- 25 Juin 2025</span></div>
+      <div class="description">
+        Première version publique de l’application Météo Mobile.<br />
+        Interface simple et responsive.
+      </div>
+    </div>
+  </div>
+</body>
+</html>
