@@ -2,12 +2,14 @@ function getMeteo() {
     const ville = document.getElementById('ville').value.trim();
     const resultat = document.getElementById('resultat');
     const cloudsContainer = document.getElementById('cloudsContainer');
+    const container = document.querySelector('.container');
     const apiKey = "f570ba4a8945e02cc0cdf9bb166d14e1";
   
     if (!ville) {
       resultat.innerHTML = "<p>❌ Merci d’entrer une ville.</p>";
       cloudsContainer.style.display = 'none';
       document.body.className = '';
+      container.style.display = 'block';
       return;
     }
   
@@ -20,6 +22,7 @@ function getMeteo() {
           resultat.innerHTML = "<p>❌ Ville introuvable.</p>";
           cloudsContainer.style.display = 'none';
           document.body.className = '';
+          container.style.display = 'block';
           return;
         }
   
@@ -27,24 +30,24 @@ function getMeteo() {
         const description = data.weather[0].description;
         const temp = Math.round(data.main.temp);
         const iconCode = data.weather[0].icon;
+        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
   
-        // Gestion fond et nuages
-        if (temps === 'clear' || temps === 'sunny') {
-          document.body.className = 'clear';
-          cloudsContainer.style.display = 'none';
-        } else if (temps.includes('cloud')) {
+        // Appliquer fond météo et gestion des nuages animés
+        if (temps.includes('cloud')) {
           document.body.className = 'clouds';
           cloudsContainer.style.display = 'block';
+          container.style.display = 'none'; // cacher le fond blanc
         } else if (temps.includes('rain') || temps.includes('drizzle') || temps.includes('thunderstorm')) {
           document.body.className = 'rain';
           cloudsContainer.style.display = 'none';
+          container.style.display = 'block';
         } else {
-          document.body.className = '';
+          document.body.className = 'clear';
           cloudsContainer.style.display = 'none';
+          container.style.display = 'block';
         }
   
-        const iconUrl = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
-  
+        // Affichage météo (toujours visible)
         resultat.innerHTML = `
           <div class="weather-card">
             <img src="${iconUrl}" alt="${description}" class="weather-icon" />
@@ -62,5 +65,6 @@ function getMeteo() {
         resultat.innerHTML = `<p>❌ Une erreur est survenue.</p>`;
         cloudsContainer.style.display = 'none';
         document.body.className = '';
+        container.style.display = 'block';
       });
   }
