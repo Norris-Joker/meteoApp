@@ -69,13 +69,41 @@
       text-align: center;
       margin-top: 10px;
     }
+
+    /* Input & Buttons */
+    #ville {
+      width: calc(100% - 130px);
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      margin-top: 15px;
+      float: left;
+    }
+    button {
+      width: 110px;
+      padding: 8px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      margin-left: 10px;
+      background: #3a6ed8;
+      color: white;
+      float: left;
+    }
+    .clearfix::after {
+      content: "";
+      clear: both;
+      display: table;
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 id="city">Chargement...</h1>
+    <h1 id="city">Bienvenue</h1>
     <div class="temp" id="temp">--°</div>
-    <div class="description" id="desc">Veuillez autoriser la géolocalisation.</div>
+    <div class="description" id="desc">Saisis une ville ou utilise ta position</div>
 
     <div class="section">
       <div class="section-title">Prévision 5 heures</div>
@@ -91,30 +119,32 @@
         <div class="item">🌞<br><span id="uv-index">--</span><br>Indice UV</div>
       </div>
     </div>
+
+    <div class="clearfix">
+      <input id="ville" type="text" placeholder="Ex : Paris" />
+      <button onclick="chercherMeteo(document.getElementById('ville').value)">Chercher</button>
+    </div>
+    <button style="width: 100%; margin-top: 10px;" onclick="demanderPosition()">Utiliser ma position</button>
   </div>
 
   <script>
     const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
 
-    function afficherMeteo(dataCurrent, dataForecast, dataUV) {
-      // Météo actuelle
+    function afficherMeteo(dataCurrent, dataForecast, dataOneCall) {
       document.getElementById("city").textContent = dataCurrent.name;
       document.getElementById("temp").textContent = `${Math.round(dataCurrent.main.temp)}°`;
       document.getElementById("desc").textContent = dataCurrent.weather[0].description;
 
-      // Détails
       document.getElementById("humidity").textContent = `${dataCurrent.main.humidity}%`;
       document.getElementById("pressure").textContent = `${dataCurrent.main.pressure} hPa`;
-      document.getElementById("wind").textContent = `${(dataCurrent.wind.speed * 3.6).toFixed(1)} km/h`; // convert m/s -> km/h
+      document.getElementById("wind").textContent = `${(dataCurrent.wind.speed * 3.6).toFixed(1)} km/h`;
 
-      // UV index
-      if(dataUV && dataUV.value !== undefined){
-        document.getElementById("uv-index").textContent = dataUV.value;
+      if(dataOneCall && dataOneCall.current && dataOneCall.current.uvi !== undefined){
+        document.getElementById("uv-index").textContent = dataOneCall.current.uvi;
       } else {
         document.getElementById("uv-index").textContent = "--";
       }
 
-      // Prévisions 5 heures
       const forecastEl = document.getElementById("forecast");
       forecastEl.innerHTML = "";
       dataForecast.list.slice(0, 5).forEach(item => {
@@ -134,6 +164,11 @@
       document.getElementById('desc').textContent = "Permission géolocalisation refusée ou indisponible.";
       document.getElementById("city").textContent = "Impossible d’obtenir la localisation";
       document.getElementById("temp").textContent = "--°";
+      document.getElementById("humidity").textContent = "--%";
+      document.getElementById("pressure").textContent = "-- hPa";
+      document.getElementById("wind").textContent = "-- km/h";
+      document.getElementById("uv-index").textContent = "--";
+      document.getElementById("forecast").innerHTML = "";
     }
 
     function demanderPosition() {
@@ -142,22 +177,16 @@
           const lat = position.coords.latitude;
           const lon = position.coords.longitude;
 
-          // API météo actuelle
           const urlCurrent = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
-          // API prévision 5 jours / 3h (on prendra 5 premiers items = 15h)
           const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
-          // API UV index (air pollution endpoint gives UV, or use OneCall API)
-          // OpenWeather recommande One Call API V3 but free tier limits this
-          // So we fetch OneCall V2 for UV only:
-          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&appid=${API_KEY}`;
+          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${API_KEY}`;
 
           Promise.all([
             fetch(urlCurrent).then(r => r.json()),
             fetch(urlForecast).then(r => r.json()),
             fetch(urlOneCall).then(r => r.json())
           ]).then(([currentData, forecastData, oneCallData]) => {
-            // UV is in current.uvi for OneCall API
-            afficherMeteo(currentData, forecastData, oneCallData.current);
+            afficherMeteo(currentData, forecastData, oneCallData);
           }).catch(() => {
             document.getElementById('desc').textContent = "Erreur lors de la récupération météo.";
           });
@@ -168,7 +197,35 @@
       }
     }
 
-    demanderPosition();
+    function chercherMeteo(ville) {
+      if(!ville || ville.trim() === "") {
+        alert("Merci d'entrer une ville");
+        return;
+      }
+
+      const urlCurrent = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ville)}&units=metric&lang=fr&appid=${API_KEY}`;
+      fetch(urlCurrent)
+        .then(res => {
+          if(!res.ok) throw new Error("Ville introuvable");
+          return res.json();
+        })
+        .then(dataCurrent => {
+          const lat = dataCurrent.coord.lat;
+          const lon = dataCurrent.coord.lon;
+          const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
+          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${API_KEY}`;
+
+          Promise.all([
+            fetch(urlForecast).then(r => r.json()),
+            fetch(urlOneCall).then(r => r.json())
+          ]).then(([forecastData, oneCallData]) => {
+            afficherMeteo(dataCurrent, forecastData, oneCallData);
+          }).catch(() => {
+            document.getElementById('desc').textContent = "Erreur lors de la récupération météo.";
+          });
+        })
+        .catch(() => alert("Ville introuvable."));
+    }
   </script>
 </body>
 </html>
