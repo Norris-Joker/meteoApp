@@ -9,7 +9,7 @@
     body {
       margin: 0;
       font-family: sans-serif;
-      background: linear-gradient(to top, #5a8dee, #87cefa);
+      background-image: url(https://www.francebleu.fr/s3/cruiser-production/2023/06/f21ac4df-5c79-4db6-9152-9b59aaa87aeb/1200x680_sc_gettyimages-1435906430.jpg);
       color: white;
       min-height: 100vh;
       display: flex;
@@ -18,16 +18,6 @@
       padding: 20px;
       position: relative;
     }
-
-    #bgVideo {
-  position: fixed;
-  top: 0; 
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: -1; /* Derrière tout le contenu */
-}
 
     .container {
       max-width: 480px;
@@ -139,10 +129,6 @@
   </style>
 </head>
 <body>
-    <video autoplay muted loop playsinline id="bgVideo">
-        <source src="https://cdn.pixabay.com/video/2016/02/13/2142-155246338_large.mp4" type="video/mp4">
-        Votre navigateur ne supporte pas la vidéo HTML5.
-      </video>
       
   <!-- MENU DEROULANT -->
   <div class="menu-toggle" onclick="toggleMenu()">☰</div>
