@@ -7,37 +7,22 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Ecran d'accueil animé */
+    /* Splash Screen */
     #splash {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: linear-gradient(135deg, #3498db, #2ecc71);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
+      background: #3498db;
       color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       z-index: 9999;
-      animation: fadeOut 1s ease-out 3s forwards;
-    }
-
-    #splash h1 {
-      font-size: 36px;
-      margin-bottom: 10px;
+      font-size: 28px;
       font-weight: bold;
-      animation: type 2.5s steps(30, end);
-      white-space: nowrap;
-      overflow: hidden;
-      border-right: 2px solid white;
-      max-width: 80vw;
-    }
-
-    @keyframes type {
-      from { width: 0 }
-      to { width: 100% }
+      animation: fadeOut 1s ease-out 2s forwards;
     }
 
     @keyframes fadeOut {
@@ -47,7 +32,6 @@
       }
     }
 
-    /* Animation d'ouverture du contenu */
     @keyframes fadeInUp {
       0% {
         opacity: 0;
@@ -61,45 +45,155 @@
 
     .container {
       animation: fadeInUp 1s ease-out both;
-      animation-delay: 3.2s;
+      animation-delay: 2s;
       opacity: 0;
     }
 
-    /* Responsive Splash Text */
-    @media (max-width: 500px) {
-      #splash h1 {
-        font-size: 26px;
+    .sous-titre {
+      font-size: 16px;
+      color: #34495e;
+      margin-bottom: 20px;
+      font-weight: 500;
+      opacity: 0.9;
+    }
+
+    .resultat {
+      transition: all 0.3s ease-in-out;
+    }
+
+    /* MENU BURGER */
+    .menu-icon {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      z-index: 10000;
+      width: 30px;
+      height: 22px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .menu-icon div {
+      height: 4px;
+      background: white;
+      border-radius: 2px;
+      transition: all 0.3s ease;
+    }
+
+    .menu {
+      position: fixed;
+      top: 0;
+      left: -250px;
+      width: 220px;
+      height: 100%;
+      background: rgba(44, 62, 80, 0.95);
+      color: white;
+      padding: 60px 20px;
+      z-index: 9998;
+      transition: left 0.3s ease;
+    }
+
+    .menu.open {
+      left: 0;
+    }
+
+    .menu a {
+      display: block;
+      color: white;
+      text-decoration: none;
+      margin-bottom: 20px;
+      font-size: 18px;
+      transition: color 0.3s;
+    }
+
+    .menu a:hover {
+      color: #3498db;
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        backdrop-filter: blur(5px);
+        background: rgba(255, 255, 255, 0.75);
+      }
+
+      .input-group {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .input-group button {
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      input[type="text"]::placeholder {
+        font-size: 14px;
+      }
+
+      .resultat img {
+        width: 60px;
+        height: 60px;
+        margin-bottom: 8px;
+      }
+
+      .resultat h2 {
+        font-size: 22px;
       }
     }
   </style>
 </head>
 <body>
+  <!-- Splash -->
+  <div id="splash">🌤️ Météo Express</div>
 
-  <!-- Splash animé -->
-  <div id="splash">
-    <h1>🌤️ Bienvenue sur Météo Express</h1>
+  <!-- Menu burger -->
+  <div class="menu-icon" onclick="toggleMenu()">
+    <div></div>
+    <div></div>
+    <div></div>
   </div>
 
-  <!-- Fond sombre -->
+  <!-- Menu déroulant -->
+  <div class="menu" id="menu">
+    <a href="developpeur.html">🧑‍💻 Le développeur</a>
+    <a href="previsions.html">🌦️ Prévisions météo</a>
+    <a href="support.html">🛠️ Support</a>
+  </div>
+
+  <!-- Overlay -->
   <div class="overlay"></div>
 
-  <!-- Contenu principal -->
-  <div class="container">
+  <!-- Contenu -->
+  <div class="container" id="meteo">
     <h1>🌤️ Météo Express</h1>
+    <p class="sous-titre">Recherchez la météo dans votre ville</p>
 
     <div class="input-group">
-      <input
-        type="text"
-        id="ville"
-        placeholder="Entrez une ville"
-        autocomplete="off"
-      />
-      <button onclick="getMeteo()">Chercher</button>
+      <input type="text" id="ville" placeholder="Ex : Paris, Lyon, Marseille" autocomplete="off" />
+      <button onclick="getMeteo()">🔍</button>
     </div>
 
     <div id="resultat" class="resultat"></div>
   </div>
 
+  <!-- Ancres -->
+  <div id="developpeur" style="display:none;">Développeur : Ton nom ici</div>
+  <div id="support" style="display:none;">Pour toute aide : tonmail@mail.com</div>
+
+  <!-- Script -->
   <script src="script.js"></script>
+  <script>
+    function toggleMenu() {
+      document.getElementById('menu').classList.toggle('open');
+    }
+  </script>
 </body>
 </html>
