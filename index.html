@@ -7,22 +7,37 @@
   <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* Splash Screen */
+    /* Ecran d'accueil animé */
     #splash {
       position: fixed;
       top: 0;
       left: 0;
       width: 100%;
       height: 100%;
-      background: #3498db;
-      color: white;
+      background: linear-gradient(135deg, #3498db, #2ecc71);
       display: flex;
-      align-items: center;
+      flex-direction: column;
       justify-content: center;
+      align-items: center;
+      color: white;
       z-index: 9999;
-      font-size: 28px;
+      animation: fadeOut 1s ease-out 3s forwards;
+    }
+
+    #splash h1 {
+      font-size: 36px;
+      margin-bottom: 10px;
       font-weight: bold;
-      animation: fadeOut 1s ease-out 2s forwards;
+      animation: type 2.5s steps(30, end);
+      white-space: nowrap;
+      overflow: hidden;
+      border-right: 2px solid white;
+      max-width: 80vw;
+    }
+
+    @keyframes type {
+      from { width: 0 }
+      to { width: 100% }
     }
 
     @keyframes fadeOut {
@@ -46,16 +61,26 @@
 
     .container {
       animation: fadeInUp 1s ease-out both;
-      animation-delay: 2s; /* attendre la fin du splash */
+      animation-delay: 3.2s;
       opacity: 0;
+    }
+
+    /* Responsive Splash Text */
+    @media (max-width: 500px) {
+      #splash h1 {
+        font-size: 26px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splash">🌤️ Météo Express</div>
 
-  <!-- Overlay arrière-plan -->
+  <!-- Splash animé -->
+  <div id="splash">
+    <h1>🌤️ Bienvenue sur Météo Express</h1>
+  </div>
+
+  <!-- Fond sombre -->
   <div class="overlay"></div>
 
   <!-- Contenu principal -->
