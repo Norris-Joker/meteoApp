@@ -1,207 +1,119 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>🌤️ Mon Appli Météo</title>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Météo Givors</title>
   <style>
-    /* Splash Screen */
-    #splash {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: #3498db;
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(to top, #5a8dee, #87cefa);
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999;
-      font-size: 28px;
-      font-weight: bold;
-      animation: fadeOut 1s ease-out 2s forwards;
     }
-
-    @keyframes fadeOut {
-      to {
-        opacity: 0;
-        visibility: hidden;
-      }
-    }
-
-    @keyframes fadeInUp {
-      0% {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
     .container {
-      animation: fadeInUp 1s ease-out both;
-      animation-delay: 2s;
-      opacity: 0;
+      padding: 20px;
+      max-width: 480px;
+      margin: auto;
     }
-
-    .sous-titre {
-      font-size: 16px;
-      color: #34495e;
-      margin-bottom: 20px;
-      font-weight: 500;
-      opacity: 0.9;
+    h1 {
+      font-size: 26px;
+      margin-bottom: 5px;
     }
-
-    .resultat {
-      transition: all 0.3s ease-in-out;
+    .temp {
+      font-size: 60px;
+      font-weight: bold;
     }
-
-    /* MENU BURGER */
-    .menu-icon {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      z-index: 10000;
-      width: 30px;
-      height: 22px;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-
-    .menu-icon div {
-      height: 4px;
-      background: white;
-      border-radius: 2px;
-      transition: all 0.3s ease;
-    }
-
-    .menu {
-      position: fixed;
-      top: 0;
-      left: -250px;
-      width: 220px;
-      height: 100%;
-      background: rgba(44, 62, 80, 0.95);
-      color: white;
-      padding: 60px 20px;
-      z-index: 9998;
-      transition: left 0.3s ease;
-    }
-
-    .menu.open {
-      left: 0;
-    }
-
-    .menu a {
-      display: block;
-      color: white;
-      text-decoration: none;
-      margin-bottom: 20px;
+    .description {
       font-size: 18px;
-      transition: color 0.3s;
+      margin-bottom: 10px;
     }
-
-    .menu a:hover {
-      color: #3498db;
+    .section {
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
     }
-
-    @media (max-width: 480px) {
-      .container {
-        backdrop-filter: blur(5px);
-        background: rgba(255, 255, 255, 0.75);
-      }
-
-      .input-group {
-        flex-direction: column;
-        gap: 15px;
-      }
-
-      .input-group button {
-        padding: 12px;
-        font-size: 18px;
-        border-radius: 50%;
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-
-      input[type="text"]::placeholder {
-        font-size: 14px;
-      }
-
-      .resultat img {
-        width: 60px;
-        height: 60px;
-        margin-bottom: 8px;
-      }
-
-      .resultat h2 {
-        font-size: 22px;
-      }
+    .section-title {
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+    .row {
+      display: flex;
+      justify-content: space-around;
+      flex-wrap: wrap;
+    }
+    .item {
+      text-align: center;
+      flex: 1 0 30%;
+      margin: 5px 0;
+    }
+    .item img {
+      width: 40px;
+      height: 40px;
     }
   </style>
 </head>
 <body>
-  <!-- Splash -->
-  <div id="splash">🌤️ Météo Express</div>
+  <div class="container">
+    <h1 id="city">Givors</h1>
+    <div class="temp" id="temp">--°</div>
+    <div class="description" id="desc">Chargement...</div>
 
-  <!-- Menu burger -->
-  <div class="menu-icon" onclick="toggleMenu()">
-    <div></div>
-    <div></div>
-    <div></div>
-  </div>
+    <div class="section">
+      <div class="section-title">Prévision 5 heures</div>
+      <div class="row" id="forecast"></div>
+    </div>
 
-  <!-- Menu déroulant -->
-  <div class="menu" id="menu">
-    <a href="developpeur.html">🧑‍💻 Le développeur</a>
-    <a href="previsions.html">🌦️ Prévisions météo</a>
-    <a href="support.html">🛠️ Support</a>
-  </div>
-
-  <!-- Overlay -->
-  <div class="overlay"></div>
-  <div class="clouds-bg" id="cloudsContainer" style="display:none;">
-    <div class="cloud cloud1"></div>
-    <div class="cloud cloud2"></div>
-    <div class="cloud cloud3"></div>
-  </div>
-  
-
-  <!-- Contenu principal -->
-<div class="container" id="meteo">
-    <h1>🌤️ Météo Express</h1>
-    <p class="sous-titre">Recherchez la météo dans votre ville</p>
-  
-    <div class="input-group">
-      <input type="text" id="ville" placeholder="Ex : Paris, Lyon, Marseille" autocomplete="off" />
-      <button onclick="getMeteo()">🔍</button>
+    <div class="section">
+      <div class="section-title">Détails</div>
+      <div class="row">
+        <div class="item">💧<br><span id="humidity">--%</span><br>Humidité</div>
+        <div class="item">💨<br><span id="wind">-- km/h</span><br>Vent</div>
+        <div class="item">📈<br><span id="pressure">--</span><br>Pression</div>
+      </div>
     </div>
   </div>
-  
-  <!-- Résultat météo affiché même sans le fond blanc -->
-  <div id="resultat" class="resultat"></div>
-  
 
-  <!-- Ancres -->
-  <div id="developpeur" style="display:none;">Développeur : Ton nom ici</div>
-  <div id="support" style="display:none;">Pour toute aide : tonmail@mail.com</div>
-
-  <!-- Script -->
-  <script src="script.js"></script>
   <script>
-    function toggleMenu() {
-      document.getElementById('menu').classList.toggle('open');
+    const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
+    const city = "Givors";
+
+    async function loadWeather() {
+      try {
+        const currentRes = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&lang=fr&appid=${API_KEY}`);
+        const current = await currentRes.json();
+
+        const forecastRes = await fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${city}&units=metric&lang=fr&appid=${API_KEY}`);
+        const forecast = await forecastRes.json();
+
+        document.getElementById("temp").textContent = `${Math.round(current.main.temp)}°`;
+        document.getElementById("desc").textContent = current.weather[0].description;
+        document.getElementById("humidity").textContent = `${current.main.humidity}%`;
+        document.getElementById("pressure").textContent = `${current.main.pressure} hPa`;
+        document.getElementById("wind").textContent = `${(current.wind.speed * 3.6).toFixed(1)} km/h`;
+
+        const forecastEl = document.getElementById("forecast");
+        forecastEl.innerHTML = "";
+        forecast.list.slice(0, 5).forEach(item => {
+          const hour = new Date(item.dt * 1000).getHours();
+          const block = document.createElement("div");
+          block.className = "item";
+          block.innerHTML = `
+            ${hour}h<br>
+            <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png"><br>
+            ${Math.round(item.main.temp)}°
+          `;
+          forecastEl.appendChild(block);
+        });
+      } catch (e) {
+        document.getElementById("desc").textContent = "Erreur de chargement météo.";
+        console.error(e);
+      }
     }
+
+    loadWeather();
   </script>
 </body>
 </html>
