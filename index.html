@@ -47,185 +47,94 @@
       font-weight: bold;
       margin-bottom: 10px;
       font-size: 18px;
-    }
-    .row {
-      display: flex;
-      justify-content: space-around;
-      flex-wrap: wrap;
-    }
-    .item {
       text-align: center;
-      flex: 1 0 30%;
-      margin: 5px 0;
     }
-    .item img {
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+    .box {
+  background: rgba(255,255,255,0.2);
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  margin-bottom: 15px; /* ✅ Ajouté pour espacer les blocs */
+         }
+
+    .box h3 {
+      margin: 0 0 8px 0;
+      font-weight: bold;
+    }
+    .forecast-item {
+      display: inline-block;
+      width: 40px;
+      margin: 0 5px;
+      font-size: 14px;
+      text-align: center;
+    }
+    .forecast-item img {
       width: 40px;
       height: 40px;
     }
-    /* UV index style */
-    #uv-index {
-      font-weight: bold;
-      font-size: 24px;
-      text-align: center;
+    input[type=text], button {
+      width: 100%;
+      padding: 12px;
       margin-top: 10px;
-    }
-
-    /* Input & Buttons */
-    #ville {
-      width: calc(100% - 130px);
-      padding: 8px;
-      font-size: 16px;
-      border-radius: 6px;
       border: none;
-      margin-top: 15px;
-      float: left;
+      border-radius: 8px;
+      font-size: 16px;
     }
     button {
-      width: 110px;
-      padding: 8px;
-      font-size: 16px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-      margin-left: 10px;
-      background: #3a6ed8;
+      background: #2874f0;
       color: white;
-      float: left;
+      cursor: pointer;
     }
-    .clearfix::after {
-      content: "";
-      clear: both;
-      display: table;
+    button:hover {
+      background: #1b5edb;
+    }
+    .error {
+      text-align:center;
+      color: #ff4c4c;
+      margin-top: 10px;
+      font-weight: bold;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1 id="city">Bienvenue</h1>
+    <h1 id="city">Veuillez saisir une ville</h1>
     <div class="temp" id="temp">--°</div>
-    <div class="description" id="desc">Saisis une ville ou utilise ta position</div>
+    <div class="description" id="desc">---</div>
 
-    <div class="section">
-      <div class="section-title">Prévision 5 heures</div>
-      <div class="row" id="forecast"></div>
-    </div>
+    <input id="ville" type="text" placeholder="Ex : Paris" />
+    <button id="btnChercher">Chercher</button>
+    <div class="error" id="error"></div>
 
-    <div class="section">
-      <div class="section-title">Détails</div>
-      <div class="row">
-        <div class="item">💧<br><span id="humidity">--%</span><br>Humidité</div>
-        <div class="item">💨<br><span id="wind">-- km/h</span><br>Vent</div>
-        <div class="item">📈<br><span id="pressure">-- hPa</span><br>Pression</div>
-        <div class="item">🌞<br><span id="uv-index">--</span><br>Indice UV</div>
+      <div class="box" id="boxHumidity">
+        <h3>Humidité</h3>
+        <div id="humidity">--%</div>
+      </div>
+
+      <div class="box" id="boxForecast24h">
+        <h3>Prévisions 24h</h3>
+        <div id="forecast24h"></div>
+      </div>
+
+      <div class="box" id="boxWind">
+        <h3>Vent & direction</h3>
+        <div id="wind">-- km/h</div>
+        <div id="windDir">--</div>
+      </div>
+
+      <div class="box" id="boxSun">
+        <h3>Lever / Coucher soleil</h3>
+        <div id="sunrise">--</div>
+        <div id="sunset">--</div>
       </div>
     </div>
-
-    <div class="clearfix">
-      <input id="ville" type="text" placeholder="Ex : Paris" />
-      <button onclick="chercherMeteo(document.getElementById('ville').value)">Chercher</button>
-    </div>
-    <button style="width: 100%; margin-top: 10px;" onclick="demanderPosition()">Utiliser ma position</button>
   </div>
 
-  <script>
-    const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
-
-    function afficherMeteo(dataCurrent, dataForecast, dataOneCall) {
-      document.getElementById("city").textContent = dataCurrent.name;
-      document.getElementById("temp").textContent = `${Math.round(dataCurrent.main.temp)}°`;
-      document.getElementById("desc").textContent = dataCurrent.weather[0].description;
-
-      document.getElementById("humidity").textContent = `${dataCurrent.main.humidity}%`;
-      document.getElementById("pressure").textContent = `${dataCurrent.main.pressure} hPa`;
-      document.getElementById("wind").textContent = `${(dataCurrent.wind.speed * 3.6).toFixed(1)} km/h`;
-
-      if(dataOneCall && dataOneCall.current && dataOneCall.current.uvi !== undefined){
-        document.getElementById("uv-index").textContent = dataOneCall.current.uvi;
-      } else {
-        document.getElementById("uv-index").textContent = "--";
-      }
-
-      const forecastEl = document.getElementById("forecast");
-      forecastEl.innerHTML = "";
-      dataForecast.list.slice(0, 5).forEach(item => {
-        const hour = new Date(item.dt * 1000).getHours();
-        const block = document.createElement("div");
-        block.className = "item";
-        block.innerHTML = `
-          ${hour}h<br>
-          <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}"><br>
-          ${Math.round(item.main.temp)}°
-        `;
-        forecastEl.appendChild(block);
-      });
-    }
-
-    function erreurGeoloc() {
-      document.getElementById('desc').textContent = "Permission géolocalisation refusée ou indisponible.";
-      document.getElementById("city").textContent = "Impossible d’obtenir la localisation";
-      document.getElementById("temp").textContent = "--°";
-      document.getElementById("humidity").textContent = "--%";
-      document.getElementById("pressure").textContent = "-- hPa";
-      document.getElementById("wind").textContent = "-- km/h";
-      document.getElementById("uv-index").textContent = "--";
-      document.getElementById("forecast").innerHTML = "";
-    }
-
-    function demanderPosition() {
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(position => {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
-
-          const urlCurrent = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
-          const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
-          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${API_KEY}`;
-
-          Promise.all([
-            fetch(urlCurrent).then(r => r.json()),
-            fetch(urlForecast).then(r => r.json()),
-            fetch(urlOneCall).then(r => r.json())
-          ]).then(([currentData, forecastData, oneCallData]) => {
-            afficherMeteo(currentData, forecastData, oneCallData);
-          }).catch(() => {
-            document.getElementById('desc').textContent = "Erreur lors de la récupération météo.";
-          });
-
-        }, erreurGeoloc);
-      } else {
-        document.getElementById('desc').textContent = "La géolocalisation n'est pas supportée par ce navigateur.";
-      }
-    }
-
-    function chercherMeteo(ville) {
-      if(!ville || ville.trim() === "") {
-        alert("Merci d'entrer une ville");
-        return;
-      }
-
-      const urlCurrent = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(ville)}&units=metric&lang=fr&appid=${API_KEY}`;
-      fetch(urlCurrent)
-        .then(res => {
-          if(!res.ok) throw new Error("Ville introuvable");
-          return res.json();
-        })
-        .then(dataCurrent => {
-          const lat = dataCurrent.coord.lat;
-          const lon = dataCurrent.coord.lon;
-          const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
-          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&units=metric&appid=${API_KEY}`;
-
-          Promise.all([
-            fetch(urlForecast).then(r => r.json()),
-            fetch(urlOneCall).then(r => r.json())
-          ]).then(([forecastData, oneCallData]) => {
-            afficherMeteo(dataCurrent, forecastData, oneCallData);
-          }).catch(() => {
-            document.getElementById('desc').textContent = "Erreur lors de la récupération météo.";
-          });
-        })
-        .catch(() => alert("Ville introuvable."));
-    }
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
