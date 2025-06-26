@@ -5,159 +5,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Météo Mobile</title>
   <style>
-    /* Reset et box-sizing */
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
-
+    * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: sans-serif;
       background: linear-gradient(to top, #5a8dee, #87cefa);
       color: white;
       min-height: 100vh;
       display: flex;
       justify-content: center;
-      align-items: flex-start;
+      align-items: center;
       padding: 20px;
     }
-
     .container {
-      background: rgba(255 255 255 / 0.15);
       max-width: 480px;
       width: 100%;
-      border-radius: 20px;
-      padding: 20px 25px 30px;
-      box-shadow: 0 8px 30px rgba(0,0,0,0.3);
-      user-select: none;
     }
-
     h1 {
-      font-weight: 700;
-      font-size: 28px;
-      margin: 0 0 10px 0;
-      text-align: center;
-      text-shadow: 0 0 10px rgba(0,0,0,0.3);
-    }
-
-    #city {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      text-align: center;
-    }
-
-    .temp {
-      font-size: 72px;
-      font-weight: 700;
-      text-align: center;
+      font-size: 26px;
       margin-bottom: 5px;
-      letter-spacing: -3px;
-      text-shadow: 0 0 15px rgba(0,0,0,0.4);
+      text-align: center;
     }
-
+    .temp {
+      font-size: 60px;
+      font-weight: bold;
+      text-align: center;
+    }
     .description {
       font-size: 18px;
-      font-weight: 500;
-      text-transform: capitalize;
+      margin-bottom: 10px;
       text-align: center;
-      margin-bottom: 25px;
-      text-shadow: 0 0 10px rgba(0,0,0,0.3);
+      text-transform: capitalize;
     }
-
     .section {
-      background: rgba(255 255 255 / 0.12);
-      border-radius: 15px;
-      padding: 15px 20px;
-      margin-bottom: 20px;
-      box-shadow: inset 0 0 10px rgba(255 255 255 / 0.15);
+      background: rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 15px;
+      margin-top: 15px;
     }
-
     .section-title {
-      font-weight: 600;
-      font-size: 20px;
-      margin-bottom: 12px;
-      border-bottom: 1px solid rgba(255 255 255 / 0.3);
-      padding-bottom: 8px;
-      text-shadow: 0 0 5px rgba(0,0,0,0.3);
+      font-weight: bold;
+      margin-bottom: 10px;
+      font-size: 18px;
     }
-
     .row {
       display: flex;
       justify-content: space-around;
-      flex-wrap: nowrap;
-      gap: 15px;
+      flex-wrap: wrap;
     }
-
     .item {
-      flex: 1 1 20%;
       text-align: center;
-      font-weight: 600;
-      font-size: 14px;
-      user-select: none;
-      cursor: default;
+      flex: 1 0 30%;
+      margin: 5px 0;
     }
-
     .item img {
-      width: 50px;
-      height: 50px;
-      filter: drop-shadow(0 0 2px rgba(0,0,0,0.25));
-      margin-bottom: 6px;
+      width: 40px;
+      height: 40px;
     }
-
-    /* Responsive */
-    @media (max-width: 400px) {
-      .temp {
-        font-size: 52px;
-      }
-
-      .row {
-        gap: 10px;
-      }
-
-      .item img {
-        width: 40px;
-        height: 40px;
-      }
+    /* UV index style */
+    #uv-index {
+      font-weight: bold;
+      font-size: 24px;
+      text-align: center;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="container" role="main" aria-label="Application météo mobile">
-    <h1>Météo Mobile</h1>
-    <div id="city" aria-live="polite">Chargement...</div>
+  <div class="container">
+    <h1 id="city">Chargement...</h1>
     <div class="temp" id="temp">--°</div>
-    <div class="description" id="desc">Chargement...</div>
+    <div class="description" id="desc">Veuillez autoriser la géolocalisation.</div>
 
-    <section class="section" aria-labelledby="forecast-title">
-      <div id="forecast-title" class="section-title">Prévision 5 heures</div>
-      <div class="row" id="forecast" role="list"></div>
-    </section>
+    <div class="section">
+      <div class="section-title">Prévision 5 heures</div>
+      <div class="row" id="forecast"></div>
+    </div>
 
-    <section class="section" aria-labelledby="details-title">
-      <div id="details-title" class="section-title">Détails</div>
-      <div class="row" role="list">
-        <div class="item" role="listitem" aria-label="Humidité">
-          💧<br />
-          <span id="humidity">--%</span><br />
-          Humidité
-        </div>
-        <div class="item" role="listitem" aria-label="Vent">
-          💨<br />
-          <span id="wind">-- km/h</span><br />
-          Vent
-        </div>
-        <div class="item" role="listitem" aria-label="Pression atmosphérique">
-          📈<br />
-          <span id="pressure">-- hPa</span><br />
-          Pression
-        </div>
+    <div class="section">
+      <div class="section-title">Détails</div>
+      <div class="row">
+        <div class="item">💧<br><span id="humidity">--%</span><br>Humidité</div>
+        <div class="item">💨<br><span id="wind">-- km/h</span><br>Vent</div>
+        <div class="item">📈<br><span id="pressure">-- hPa</span><br>Pression</div>
+        <div class="item">🌞<br><span id="uv-index">--</span><br>Indice UV</div>
       </div>
-    </section>
+    </div>
   </div>
 
   <script>
-    // Le JS viendra ici
+    const API_KEY = "f570ba4a8945e02cc0cdf9bb166d14e1";
+
+    function afficherMeteo(dataCurrent, dataForecast, dataUV) {
+      // Météo actuelle
+      document.getElementById("city").textContent = dataCurrent.name;
+      document.getElementById("temp").textContent = `${Math.round(dataCurrent.main.temp)}°`;
+      document.getElementById("desc").textContent = dataCurrent.weather[0].description;
+
+      // Détails
+      document.getElementById("humidity").textContent = `${dataCurrent.main.humidity}%`;
+      document.getElementById("pressure").textContent = `${dataCurrent.main.pressure} hPa`;
+      document.getElementById("wind").textContent = `${(dataCurrent.wind.speed * 3.6).toFixed(1)} km/h`; // convert m/s -> km/h
+
+      // UV index
+      if(dataUV && dataUV.value !== undefined){
+        document.getElementById("uv-index").textContent = dataUV.value;
+      } else {
+        document.getElementById("uv-index").textContent = "--";
+      }
+
+      // Prévisions 5 heures
+      const forecastEl = document.getElementById("forecast");
+      forecastEl.innerHTML = "";
+      dataForecast.list.slice(0, 5).forEach(item => {
+        const hour = new Date(item.dt * 1000).getHours();
+        const block = document.createElement("div");
+        block.className = "item";
+        block.innerHTML = `
+          ${hour}h<br>
+          <img src="https://openweathermap.org/img/wn/${item.weather[0].icon}@2x.png" alt="${item.weather[0].description}"><br>
+          ${Math.round(item.main.temp)}°
+        `;
+        forecastEl.appendChild(block);
+      });
+    }
+
+    function erreurGeoloc() {
+      document.getElementById('desc').textContent = "Permission géolocalisation refusée ou indisponible.";
+      document.getElementById("city").textContent = "Impossible d’obtenir la localisation";
+      document.getElementById("temp").textContent = "--°";
+    }
+
+    function demanderPosition() {
+      if ("geolocation" in navigator) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          // API météo actuelle
+          const urlCurrent = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
+          // API prévision 5 jours / 3h (on prendra 5 premiers items = 15h)
+          const urlForecast = `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&lang=fr&appid=${API_KEY}`;
+          // API UV index (air pollution endpoint gives UV, or use OneCall API)
+          // OpenWeather recommande One Call API V3 but free tier limits this
+          // So we fetch OneCall V2 for UV only:
+          const urlOneCall = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${lon}&exclude=minutely,hourly,daily,alerts&appid=${API_KEY}`;
+
+          Promise.all([
+            fetch(urlCurrent).then(r => r.json()),
+            fetch(urlForecast).then(r => r.json()),
+            fetch(urlOneCall).then(r => r.json())
+          ]).then(([currentData, forecastData, oneCallData]) => {
+            // UV is in current.uvi for OneCall API
+            afficherMeteo(currentData, forecastData, oneCallData.current);
+          }).catch(() => {
+            document.getElementById('desc').textContent = "Erreur lors de la récupération météo.";
+          });
+
+        }, erreurGeoloc);
+      } else {
+        document.getElementById('desc').textContent = "La géolocalisation n'est pas supportée par ce navigateur.";
+      }
+    }
+
+    demanderPosition();
   </script>
 </body>
 </html>
