@@ -216,21 +216,21 @@
 
     /* Onglets villes sauvegardées en colonne à gauche */
     #savedCities {
-      position: fixed;
-      top: 20px;
-      left: 20px;
-      background: rgba(40, 116, 240, 0.85);
-      padding: 12px 8px;
-      border-radius: 14px;
-      font-size: 14px;
-      z-index: 10000;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 80vh;
-      overflow-y: auto;
-      box-shadow: 0 0 20px rgba(40,116,240,0.8);
-      user-select: none;
+  position: static; /* plus fixe */
+  
+  padding: 12px 8px;
+  border-radius: 14px;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 200px; /* ou une hauteur adaptée */
+  overflow-y: auto;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+  user-select: none;
+  margin-top: 15px; /* espace au-dessus */
+  width: 100%; /* prendre toute la largeur du container */
+
     }
     #savedCities::-webkit-scrollbar {
       width: 6px;
@@ -241,8 +241,8 @@
     }
 
     #savedCities button {
-      background: rgba(255,255,255,0.9);
-      color: #2874f0;
+      background: rgba(255, 255, 255, 0.9);
+      color: #000000;
       border: none;
       padding: 10px 14px;
       border-radius: 14px;
@@ -256,10 +256,10 @@
     }
     #savedCities button:hover,
     #savedCities button:focus {
-      background: #1b5edb;
+      background: #000000;
       color: white;
       outline: none;
-      box-shadow: 0 5px 15px rgba(27,94,219,0.85);
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.85);
     }
 
     /* Carte météo */
@@ -283,8 +283,7 @@
 </head>
 
 <body>
-  <!-- Onglets villes sauvegardées -->
-  <div id="savedCities" aria-label="Villes sauvegardées"></div>
+
 
   <!-- MENU HAMBURGER -->
   <div class="menu-toggle" role="button" aria-label="Ouvrir le menu" tabindex="0" onclick="toggleMenu()" onkeydown="if(event.key==='Enter'){toggleMenu()}">☰</div>
@@ -302,6 +301,10 @@
 
     <input id="ville" type="text" placeholder="Ex : Paris" aria-label="Saisir une ville" autocomplete="off" />
     <button id="btnChercher" aria-label="Chercher la météo">Chercher</button>
+
+    <!-- Villes enregistrées sous le bouton Chercher -->
+  <div id="savedCities" aria-label="Villes sauvegardées" style="margin-top: 15px;"></div>
+  
     <div class="error" id="error" role="alert" aria-live="assertive"></div>
 
     <section class="section" aria-label="Détails météo">
@@ -388,28 +391,66 @@
       }
     }
     function renderSavedCities() {
-      const cities = getSavedCities();
-      elements.savedCitiesContainer.innerHTML = "";
-      if (cities.length === 0) {
-        const span = document.createElement("span");
-        span.textContent = "Aucune ville sauvegardée";
-        span.style.color = "rgba(255,255,255,0.7)";
-        span.style.fontStyle = "italic";
-        elements.savedCitiesContainer.appendChild(span);
-        return;
-      }
-      cities.forEach(city => {
-        const btn = document.createElement("button");
-        btn.textContent = city;
-        btn.title = "Afficher la météo pour " + city;
-        btn.setAttribute("aria-label", "Afficher la météo pour " + city);
-        btn.addEventListener("click", () => {
-          elements.villeInput.value = city;
-          fetchWeatherData(city);
-        });
-        elements.savedCitiesContainer.appendChild(btn);
-      });
+  const cities = getSavedCities();
+  elements.savedCitiesContainer.innerHTML = "";
+  if (cities.length === 0) {
+    const span = document.createElement("span");
+    span.textContent = "Aucune ville sauvegardée";
+    span.style.color = "rgba(255,255,255,0.7)";
+    span.style.fontStyle = "italic";
+    elements.savedCitiesContainer.appendChild(span);
+    return;
+  }
+  cities.forEach(city => {
+    const container = document.createElement("div");
+    container.style.display = "flex";
+    container.style.justifyContent = "space-between";
+    container.style.alignItems = "center";
+    container.style.marginBottom = "6px";
+
+    const btnCity = document.createElement("button");
+    btnCity.textContent = city;
+    btnCity.title = "Afficher la météo pour " + city;
+    btnCity.setAttribute("aria-label", "Afficher la météo pour " + city);
+    btnCity.style.flexGrow = "1";
+    btnCity.style.marginRight = "8px";
+    btnCity.addEventListener("click", () => {
+      elements.villeInput.value = city;
+      fetchWeatherData(city);
+    });
+
+    const btnDelete = document.createElement("button");
+    btnDelete.textContent = "×";  // croix
+    btnDelete.title = "Supprimer " + city;
+    btnDelete.setAttribute("aria-label", "Supprimer " + city);
+    btnDelete.style.background = "transparent";
+    btnDelete.style.color = "white";
+    btnDelete.style.border = "none";
+    btnDelete.style.fontSize = "12px";
+    btnDelete.style.cursor = "pointer";
+    btnDelete.style.fontWeight = "500";
+    btnDelete.style.userSelect = "none";
+    btnDelete.style.padding = "0 1px";
+    
+
+    btnDelete.addEventListener("click", (e) => {
+      e.stopPropagation(); // éviter que ça déclenche l'affichage météo
+      removeCity(city);
+    });
+
+    container.appendChild(btnCity);
+    container.appendChild(btnDelete);
+    elements.savedCitiesContainer.appendChild(container);
+  });
     }
+
+    function removeCity(cityToRemove) {
+  let cities = getSavedCities();
+  cities = cities.filter(city => city !== cityToRemove);
+  saveCities(cities);
+  renderSavedCities();
+}
+
 
     // Format heure locale HHh
     function formatHour(dtUnix, timezoneOffset) {
