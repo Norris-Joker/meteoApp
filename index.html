@@ -43,25 +43,17 @@
       padding: 15px;
       margin-top: 15px;
     }
-    .section-title {
-      font-weight: bold;
-      margin-bottom: 10px;
-      font-size: 18px;
-      text-align: center;
-    }
     .grid {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
       gap: 15px;
     }
     .box {
-  background: rgba(255,255,255,0.2);
-  border-radius: 12px;
-  padding: 12px;
-  text-align: center;
-  margin-bottom: 15px; /* ✅ Ajouté pour espacer les blocs */
-         }
-
+      background: rgba(255,255,255,0.2);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+    }
     .box h3 {
       margin: 0 0 8px 0;
       font-weight: bold;
@@ -111,30 +103,23 @@
     <button id="btnChercher">Chercher</button>
     <div class="error" id="error"></div>
 
-      <div class="box" id="boxHumidity">
-        <h3>Humidité</h3>
-        <div id="humidity">--%</div>
-      </div>
-
-      <div class="box" id="boxForecast24h">
-        <h3>Prévisions 24h</h3>
-        <div id="forecast24h"></div>
-      </div>
-
-      <div class="box" id="boxWind">
-        <h3>Vent & direction</h3>
-        <div id="wind">-- km/h</div>
-        <div id="windDir">--</div>
-      </div>
-
-      <div class="box" id="boxSun">
-        <h3>Lever / Coucher soleil</h3>
-        <div id="sunrise">--</div>
-        <div id="sunset">--</div>
+    <div class="section">
+      <div class="grid">
+        <div class="box">
+          <h3>Humidité</h3>
+          <div id="humidity">--%</div>
+        </div>
+        <div class="box">
+          <h3>Vent</h3>
+          <div id="wind">-- km/h</div>
+        </div>
+        <div class="box" style="grid-column: span 2;">
+          <h3>Prévisions 24h</h3>
+          <div id="forecast24h"></div>
+        </div>
       </div>
     </div>
   </div>
-
   <script src="script.js"></script>
 </body>
 </html>
