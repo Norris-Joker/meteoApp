@@ -68,3 +68,4 @@ function getMeteo() {
         container.style.display = 'block';
       });
   }
+  
