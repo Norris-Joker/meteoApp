@@ -423,14 +423,19 @@
     btnDelete.textContent = "×";  // croix
     btnDelete.title = "Supprimer " + city;
     btnDelete.setAttribute("aria-label", "Supprimer " + city);
-    btnDelete.style.background = "transparent";
-    btnDelete.style.color = "white";
-    btnDelete.style.border = "none";
-    btnDelete.style.fontSize = "12px";
-    btnDelete.style.cursor = "pointer";
-    btnDelete.style.fontWeight = "500";
-    btnDelete.style.userSelect = "none";
-    btnDelete.style.padding = "0 1px";
+    btnDelete.style.fontSize = "12px";   // petite taille
+btnDelete.style.padding = "0 4px";   // petit padding horizontal
+btnDelete.style.lineHeight = "1";    // pour que ce soit bien compact
+btnDelete.style.width = "18px";      // largeur fixe pour que ce soit carré
+btnDelete.style.height = "18px";     // hauteur fixe
+btnDelete.style.textAlign = "center"; 
+btnDelete.style.borderRadius = "3px";  // un peu arrondi
+btnDelete.style.background = "transparent";
+btnDelete.style.color = "rgba(255,255,255,0.6)";
+btnDelete.style.border = "none";
+btnDelete.style.cursor = "pointer";
+btnDelete.style.userSelect = "none";
+btnDelete.style.transition = "color 0.3s";
     
 
     btnDelete.addEventListener("click", (e) => {
