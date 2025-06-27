@@ -32,10 +32,6 @@
       height: 100%;
       overflow: hidden;
       touch-action: pan-y;
-      -webkit-user-select:none;
-      -moz-user-select:none;
-      -ms-user-select:none;
-      user-select:none;
     }
     .screen {
       position: absolute;
@@ -70,12 +66,12 @@
     }
     .main {
       position: absolute;
-      top: 0;
+      top: 15%;
       bottom: 0;
       width: 100%;
       display: flex;
       flex-direction: column;
-      justify-content: center;
+      justify-content: flex-start;
       align-items: flex-start;
       padding-left: 20px;
       z-index: 2;
@@ -95,14 +91,28 @@
       animation: fadeIn 1s ease;
       text-align: left;
     }
-    .sub {
+    #desc {
       font-size: 24px;
       font-weight: 300;
       opacity: 0.9;
-      margin-top: -12px;
+      margin-top: 12px;
       animation: fadeIn 1.2s ease;
       text-align: left;
       padding-left: 4px;
+    }
+    #vigilance {
+      margin-top: 140px;
+      padding: 12px 16px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 12px;
+      color: #fff;
+      font-weight: 600;
+      max-width: 90%;
+      user-select: none;
+      line-height: 1.3;
+      z-index: 10;
+      position: relative;
+      box-shadow: 0 0 10px rgba(0,0,0,0.7);
     }
     @keyframes fadeIn {
       from {
@@ -114,25 +124,6 @@
         transform: translateY(0);
       }
     }
-
-    /* Vigilance case modifiée */
-    #vigilance {
-      background: rgba(0, 0, 0, 0.35);
-      padding: 12px 16px;
-      border-radius: 14px;
-      margin-top: 20px;
-      display: inline-block;
-      color: #fff !important;
-      font-weight: 600;
-      font-size: 18px;
-      user-select: text;
-      min-width: 260px;
-      text-align: center;
-      box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
-      white-space: normal;
-      line-height: 1.4;
-    }
-
     .tab-bar {
       position: absolute;
       bottom: 0;
@@ -252,231 +243,172 @@
 </head>
 <body>
   <div id="app">
-    <section id="home" class="screen active" aria-label="Écran météo">
+    <section id="home" class="screen active">
       <div class="bg" id="bgHome"></div>
       <div class="overlay"></div>
-      <div class="main" role="main">
-        <div id="loc" aria-live="polite">Ville</div>
-        <div class="big" id="temp" aria-live="polite">--°C</div>
-        <div class="sub" id="desc" aria-live="polite">---</div>
-        <div id="vigilance" class="sub" aria-live="polite"></div>
+      <div class="main">
+        <div id="loc">Ville</div>
+        <div class="big" id="temp">--°C</div>
+        <div id="desc" class="sub">---</div>
+        <div id="vigilance"></div>
       </div>
-      <nav class="tab-bar" role="tablist">
-        <div class="tab active" data-screen="home" role="tab" tabindex="0" aria-selected="true" aria-controls="home">Météo</div>
-        <div class="tab" data-screen="humid" role="tab" tabindex="-1" aria-selected="false" aria-controls="humid">Humidité</div>
+      <nav class="tab-bar">
+        <div class="tab active" data-screen="home">Météo</div>
+        <div class="tab" data-screen="humid">Humidité</div>
       </nav>
     </section>
-    <section id="humid" class="screen" aria-label="Écran humidité">
+    <section id="humid" class="screen">
       <div class="bg" id="bgHumid"></div>
       <div class="overlay"></div>
       <div class="header">
         <div class="title">Humidité</div>
       </div>
-      <div class="main" role="main">
-        <div class="big" id="humidityVal" aria-live="polite">--%</div>
+      <div class="main">
+        <div class="big" id="humidityVal">--%</div>
       </div>
-      <nav class="tab-bar" role="tablist">
-        <div class="tab" data-screen="home" role="tab" tabindex="0" aria-selected="false" aria-controls="home">Météo</div>
-        <div class="tab active" data-screen="humid" role="tab" tabindex="-1" aria-selected="true" aria-controls="humid">Humidité</div>
+      <nav class="tab-bar">
+        <div class="tab" data-screen="home">Météo</div>
+        <div class="tab active" data-screen="humid">Humidité</div>
       </nav>
     </section>
   </div>
 
   <div id="topButtons">
-    <div id="openSearchBtn" class="btn" title="Rechercher" aria-label="Ouvrir la recherche">+</div>
+    <div id="openSearchBtn" class="btn" title="Rechercher">+</div>
     <div id="settingsBtn" class="btn" title="Paramètres" aria-label="Paramètres">
       <svg class="icon-gear" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path
           d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-2.44l1.77-1.36-1.45-2.51-2.1.22a7.96 7.96 0 0 0-1.36-1.36l.22-2.1-2.51-1.45-1.36 1.77a8.04 8.04 0 0 0-3.37 0L7.85 6.9 5.34 8.35l.22 2.1a7.96 7.96 0 0 0-1.36 1.36l-2.1-.22-1.45 2.51 1.77 1.36a8.04 8.04 0 0 0 0 3.37l-1.77 1.36 1.45 2.51 2.1-.22a7.96 7.96 0 0 0 1.36 1.36l-.22 2.1 2.51 1.45 1.36-1.77a8.04 8.04 0 0 0 3.37 0l1.36 1.77 2.51-1.45-.22-2.1a7.96 7.96 0 0 0 1.36-1.36l2.1.22 1.45-2.51-1.77-1.36a8.04 8.04 0 0 0 0-3.37z"
-        ></path>
+        />
       </svg>
     </div>
   </div>
 
   <div id="searchBar">
-    <input type="text" id="cityInput" placeholder="Nom de la ville" autocomplete="off" />
-    <button id="searchBtn">Rechercher</button>
+    <input type="text" id="searchInput" placeholder="Recherche ville..." />
+    <button id="searchBtn">OK</button>
   </div>
 
   <script>
-    const apiKey = 'f570ba4a8945e02cc0cdf9bb166d14e1'; // Ta clé API
-
-    // DOM Elements
-    const locElem = document.getElementById('loc');
-    const tempElem = document.getElementById('temp');
-    const descElem = document.getElementById('desc');
-    const humidityValElem = document.getElementById('humidityVal');
-    const vigilanceElem = document.getElementById('vigilance');
+    const vigilanceBox = document.getElementById('vigilance');
+    const loc = document.getElementById('loc');
+    const temp = document.getElementById('temp');
+    const desc = document.getElementById('desc');
     const bgHome = document.getElementById('bgHome');
-    const bgHumid = document.getElementById('bgHumid');
 
     const tabs = document.querySelectorAll('.tab');
     const screens = document.querySelectorAll('.screen');
 
-    // Gestion du passage d'écran par clic onglets
+    // Exemple de vigilance selon température
+    function getVigilance(tempC) {
+      if (tempC < 20) {
+        return {
+          level: 'Verte',
+          precautions: 'Temps agréable. Pas de précautions particulières.',
+          color: 'rgba(0, 128, 0, 0.5)',
+        };
+      } else if (tempC < 25) {
+        return {
+          level: 'Jaune',
+          precautions: 'Pensez à bien vous hydrater et éviter les efforts prolongés.',
+          color: 'rgba(255, 255, 0, 0.5)',
+        };
+      } else if (tempC < 30) {
+        return {
+          level: 'Orange',
+          precautions: 'Limitez les activités en plein soleil et protégez-vous.',
+          color: 'rgba(255, 165, 0, 0.5)',
+        };
+      } else {
+        return {
+          level: 'Rouge',
+          precautions: 'Restez à l’ombre, buvez beaucoup d’eau et évitez les sorties inutiles.',
+          color: 'rgba(255, 0, 0, 0.5)',
+        };
+      }
+    }
+
+    // Mise à jour vigilance avec précautions
+    function updateVigilance(tempC) {
+      const vig = getVigilance(tempC);
+      vigilanceBox.style.background = vig.color;
+      vigilanceBox.textContent = `Vigilance ${vig.level} : ${vig.precautions}`;
+    }
+
+    // Mise à jour météo fictive
+    function updateWeather() {
+      // Pour l’exemple, on simule la météo avec une température fixe
+      const temperature = 26;
+      const description = 'Nuageux';
+
+      loc.textContent = 'Paris';
+      temp.textContent = `${temperature}°C`;
+      desc.textContent = description;
+
+      // BG selon description
+      if (description.toLowerCase().includes('dégagé') || description.toLowerCase().includes('clair')) {
+        bgHome.style.backgroundImage = 'url("https://images.unsplash.com/photo-1719815779858-63adea4c918b?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8Y2llbCUyMGQlQzMlQTlnYWclQzMlQTl8ZW58MHx8MHx8fDA%3D")';
+        bgHome.style.backgroundSize = 'cover';
+        bgHome.style.backgroundPosition = 'center';
+      } else {
+        // Gradient bleu par défaut
+        bgHome.style.backgroundImage = '';
+        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
+      }
+
+      updateVigilance(temperature);
+    }
+
+    // Gestion tabs
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const targetScreen = tab.dataset.screen;
-        screens.forEach(screen => {
-          screen.classList.toggle('active', screen.id === targetScreen);
-        });
-        tabs.forEach(t => {
-          t.classList.toggle('active', t === tab);
-          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
-          t.tabIndex = t === tab ? 0 : -1;
+        const screenToShow = tab.getAttribute('data-screen');
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        screens.forEach(s => {
+          if (s.id === screenToShow) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
         });
       });
     });
 
-    // Swipe detection (gauche/droite) sur #app
-    let touchStartX = 0;
-    let touchEndX = 0;
+    // Swipe entre écrans
+    let startX = 0;
+    let currentScreen = 0;
 
-    function handleGesture() {
-      const deltaX = touchEndX - touchStartX;
-      if (Math.abs(deltaX) > 50) {
-        // Sens du swipe
-        if (deltaX < 0) {
-          // swipe vers la gauche: home -> humid
-          switchToScreen('humid');
-        } else {
-          // swipe vers la droite: humid -> home
-          switchToScreen('home');
+    function showScreen(index) {
+      screens.forEach((screen, i) => {
+        screen.classList.toggle('active', i === index);
+        tabs[i].classList.toggle('active', i === index);
+      });
+      currentScreen = index;
+    }
+
+    document.getElementById('app').addEventListener('touchstart', (e) => {
+      startX = e.touches[0].clientX;
+    });
+
+    document.getElementById('app').addEventListener('touchend', (e) => {
+      const endX = e.changedTouches[0].clientX;
+      const diffX = endX - startX;
+      if (diffX > 50) {
+        // swipe right
+        if (currentScreen > 0) {
+          showScreen(currentScreen - 1);
+        }
+      } else if (diffX < -50) {
+        // swipe left
+        if (currentScreen < screens.length - 1) {
+          showScreen(currentScreen + 1);
         }
       }
-    }
-
-    function switchToScreen(screenId) {
-      screens.forEach(screen => {
-        screen.classList.toggle('active', screen.id === screenId);
-      });
-      tabs.forEach(t => {
-        const isActive = t.dataset.screen === screenId;
-        t.classList.toggle('active', isActive);
-        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
-        t.tabIndex = isActive ? 0 : -1;
-      });
-    }
-
-    const app = document.getElementById('app');
-    app.addEventListener('touchstart', e => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-    app.addEventListener('touchend', e => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleGesture();
     });
 
-    // Vigilance et précautions personnalisées selon la température
-    function updateVigilance(temp) {
-      let text = '';
-      let color = '';
-      let precaution = '';
-
-      if (temp < 20) {
-        text = 'Vigilance Verte';
-        color = 'rgba(0,128,0,0.7)';
-        precaution = 'Conditions normales, aucune précaution spécifique.';
-      } else if (temp < 25) {
-        text = 'Vigilance Jaune';
-        color = 'rgba(255,255,0,0.7)';
-        precaution = 'Restez vigilant, évitez les efforts physiques intenses.';
-      } else if (temp < 30) {
-        text = 'Vigilance Orange';
-        color = 'rgba(255,165,0,0.7)';
-        precaution = 'Hydratez-vous régulièrement et limitez l\'exposition au soleil.';
-      } else {
-        text = 'Vigilance Rouge';
-        color = 'rgba(255,0,0,0.7)';
-        precaution = 'Restez au frais, évitez les sorties prolongées et surveillez les personnes vulnérables.';
-      }
-
-      vigilanceElem.innerHTML = `<strong>${text}</strong><br>${precaution}`;
-      vigilanceElem.style.backgroundColor = color;
-    }
-
-    // Mise à jour météo et vigilance
-    function updateWeather(data) {
-      if (!data || !data.main || !data.weather) {
-        locElem.textContent = 'Ville non trouvée';
-        tempElem.textContent = '--°C';
-        descElem.textContent = '---';
-        vigilanceElem.textContent = '';
-        vigilanceElem.style.backgroundColor = 'transparent';
-        humidityValElem.textContent = '--%';
-        return;
-      }
-      locElem.textContent = `${data.name}, ${data.sys.country}`;
-      const temp = Math.round(data.main.temp);
-      tempElem.textContent = `${temp}°C`;
-      descElem.textContent = data.weather[0].description;
-      humidityValElem.textContent = `${data.main.humidity}%`;
-
-      updateVigilance(temp);
-
-      // Change background gradient selon météo (simple exemple)
-      const weatherId = data.weather[0].id;
-      if (weatherId >= 200 && weatherId < 600) {
-        // Pluie, orage, neige
-        bgHome.style.background = 'linear-gradient(to bottom, #374e72, #0f2027)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #374e72, #0f2027)';
-      } else if (weatherId >= 600 && weatherId < 700) {
-        // Neige
-        bgHome.style.background = 'linear-gradient(to bottom, #83a4d4, #b6fbff)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #83a4d4, #b6fbff)';
-      } else if (weatherId === 800) {
-        // Clair
-        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-      } else {
-        // Nuageux ou autre
-        bgHome.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
-      }
-    }
-
-    // Requête API météo
-    async function fetchWeather(city) {
-      try {
-        const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${apiKey}`
-        );
-        const data = await res.json();
-        if (data.cod !== 200) throw new Error(data.message);
-        updateWeather(data);
-      } catch (error) {
-        alert('Erreur API : ' + error.message);
-      }
-    }
-
-    // Recherche
-    const openSearchBtn = document.getElementById('openSearchBtn');
-    const searchBar = document.getElementById('searchBar');
-    const cityInput = document.getElementById('cityInput');
-    const searchBtn = document.getElementById('searchBtn');
-
-    openSearchBtn.addEventListener('click', () => {
-      searchBar.style.display = searchBar.style.display === 'flex' ? 'none' : 'flex';
-      if (searchBar.style.display === 'flex') cityInput.focus();
-    });
-
-    searchBtn.addEventListener('click', () => {
-      const city = cityInput.value.trim();
-      if (city.length > 0) {
-        fetchWeather(city);
-        searchBar.style.display = 'none';
-        cityInput.value = '';
-      }
-    });
-
-    cityInput.addEventListener('keypress', e => {
-      if (e.key === 'Enter') {
-        searchBtn.click();
-      }
-    });
-
-    // Au chargement, afficher météo d'une ville par défaut
-    fetchWeather('Paris');
+    // Initialisation
+    updateWeather();
   </script>
 </body>
 </html>
