@@ -32,6 +32,10 @@
       height: 100%;
       overflow: hidden;
       touch-action: pan-y;
+      -webkit-user-select:none;
+      -moz-user-select:none;
+      -ms-user-select:none;
+      user-select:none;
     }
     .screen {
       position: absolute;
@@ -110,6 +114,25 @@
         transform: translateY(0);
       }
     }
+
+    /* Vigilance case modifiée */
+    #vigilance {
+      background: rgba(0, 0, 0, 0.35);
+      padding: 12px 16px;
+      border-radius: 14px;
+      margin-top: 20px;
+      display: inline-block;
+      color: #fff !important;
+      font-weight: 600;
+      font-size: 18px;
+      user-select: text;
+      min-width: 260px;
+      text-align: center;
+      box-shadow: 0 0 8px rgba(0, 0, 0, 0.25);
+      white-space: normal;
+      line-height: 1.4;
+    }
+
     .tab-bar {
       position: absolute;
       bottom: 0;
@@ -229,199 +252,231 @@
 </head>
 <body>
   <div id="app">
-    <section id="home" class="screen active">
+    <section id="home" class="screen active" aria-label="Écran météo">
       <div class="bg" id="bgHome"></div>
       <div class="overlay"></div>
-      <div class="main">
-        <div id="loc">Ville</div>
-        <div class="big" id="temp">--°C</div>
-        <div class="sub" id="desc">---</div>
+      <div class="main" role="main">
+        <div id="loc" aria-live="polite">Ville</div>
+        <div class="big" id="temp" aria-live="polite">--°C</div>
+        <div class="sub" id="desc" aria-live="polite">---</div>
+        <div id="vigilance" class="sub" aria-live="polite"></div>
       </div>
-      <nav class="tab-bar">
-        <div class="tab active" data-screen="home">Météo</div>
-        <div class="tab" data-screen="humid">Humidité</div>
+      <nav class="tab-bar" role="tablist">
+        <div class="tab active" data-screen="home" role="tab" tabindex="0" aria-selected="true" aria-controls="home">Météo</div>
+        <div class="tab" data-screen="humid" role="tab" tabindex="-1" aria-selected="false" aria-controls="humid">Humidité</div>
       </nav>
     </section>
-    <section id="humid" class="screen">
+    <section id="humid" class="screen" aria-label="Écran humidité">
       <div class="bg" id="bgHumid"></div>
       <div class="overlay"></div>
       <div class="header">
         <div class="title">Humidité</div>
       </div>
-      <div class="main">
-        <div class="big" id="humidityVal">--%</div>
+      <div class="main" role="main">
+        <div class="big" id="humidityVal" aria-live="polite">--%</div>
       </div>
-      <nav class="tab-bar">
-        <div class="tab" data-screen="home">Météo</div>
-        <div class="tab active" data-screen="humid">Humidité</div>
+      <nav class="tab-bar" role="tablist">
+        <div class="tab" data-screen="home" role="tab" tabindex="0" aria-selected="false" aria-controls="home">Météo</div>
+        <div class="tab active" data-screen="humid" role="tab" tabindex="-1" aria-selected="true" aria-controls="humid">Humidité</div>
       </nav>
     </section>
   </div>
 
   <div id="topButtons">
-    <div id="openSearchBtn" class="btn" title="Rechercher">+</div>
+    <div id="openSearchBtn" class="btn" title="Rechercher" aria-label="Ouvrir la recherche">+</div>
     <div id="settingsBtn" class="btn" title="Paramètres" aria-label="Paramètres">
       <svg class="icon-gear" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path
-          d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-2.44l1.77-1.36-1.45-2.51-2.1.22a7.96 7.96 0 0 0-1.36-1.36l.22-2.1-2.51-1.45-1.36 1.77a8.04 8.04 0 0 0-3.37 0L7.86 5.8 5.35 7.25l.22 2.1a7.96 7.96 0 0 0-1.36 1.36l-2.1-.22-1.45 2.51 1.77 1.36a8.04 8.04 0 0 0 0 3.37l-1.77 1.36 1.45 2.51 2.1-.22a7.96 7.96 0 0 0 1.36 1.36l-.22 2.1 2.51 1.45 1.36-1.77a8.04 8.04 0 0 0 3.37 0l1.36 1.77 2.51-1.45-.22-2.1a7.96 7.96 0 0 0 1.36-1.36l2.1.22 1.45-2.51-1.77-1.36a8.04 8.04 0 0 0 0-3.37z"
+          d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-2.44l1.77-1.36-1.45-2.51-2.1.22a7.96 7.96 0 0 0-1.36-1.36l.22-2.1-2.51-1.45-1.36 1.77a8.04 8.04 0 0 0-3.37 0L7.85 6.9 5.34 8.35l.22 2.1a7.96 7.96 0 0 0-1.36 1.36l-2.1-.22-1.45 2.51 1.77 1.36a8.04 8.04 0 0 0 0 3.37l-1.77 1.36 1.45 2.51 2.1-.22a7.96 7.96 0 0 0 1.36 1.36l-.22 2.1 2.51 1.45 1.36-1.77a8.04 8.04 0 0 0 3.37 0l1.36 1.77 2.51-1.45-.22-2.1a7.96 7.96 0 0 0 1.36-1.36l2.1.22 1.45-2.51-1.77-1.36a8.04 8.04 0 0 0 0-3.37z"
         ></path>
       </svg>
     </div>
   </div>
 
   <div id="searchBar">
-    <input type="text" id="cityInput" placeholder="Entrez une ville" />
-    <button id="searchBtn">Chercher</button>
+    <input type="text" id="cityInput" placeholder="Nom de la ville" autocomplete="off" />
+    <button id="searchBtn">Rechercher</button>
   </div>
 
   <script>
-    const apiKey = 'f570ba4a8945e02cc0cdf9bb166d14e1';
+    const apiKey = 'f570ba4a8945e02cc0cdf9bb166d14e1'; // Ta clé API
 
-    const homeScreen = document.getElementById('home');
-    const humidScreen = document.getElementById('humid');
+    // DOM Elements
     const locElem = document.getElementById('loc');
     const tempElem = document.getElementById('temp');
     const descElem = document.getElementById('desc');
     const humidityValElem = document.getElementById('humidityVal');
+    const vigilanceElem = document.getElementById('vigilance');
     const bgHome = document.getElementById('bgHome');
     const bgHumid = document.getElementById('bgHumid');
+
     const tabs = document.querySelectorAll('.tab');
-    const openSearchBtn = document.getElementById('openSearchBtn');
-    const settingsBtn = document.getElementById('settingsBtn');
-    const searchBar = document.getElementById('searchBar');
-    const cityInput = document.getElementById('cityInput');
-    const searchBtn = document.getElementById('searchBtn');
+    const screens = document.querySelectorAll('.screen');
 
-    // Fonction pour switcher entre écrans
-    function switchToScreen(index) {
-      if (index === 0) {
-        homeScreen.classList.add('active');
-        humidScreen.classList.remove('active');
-        tabs.forEach(t => {
-          if (t.dataset.screen === 'home') t.classList.add('active');
-          else t.classList.remove('active');
-        });
-      } else {
-        humidScreen.classList.add('active');
-        homeScreen.classList.remove('active');
-        tabs.forEach(t => {
-          if (t.dataset.screen === 'humid') t.classList.add('active');
-          else t.classList.remove('active');
-        });
-      }
-    }
-
-    // Écoute onglets
+    // Gestion du passage d'écran par clic onglets
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        switchToScreen(tab.dataset.screen === 'home' ? 0 : 1);
+        const targetScreen = tab.dataset.screen;
+        screens.forEach(screen => {
+          screen.classList.toggle('active', screen.id === targetScreen);
+        });
+        tabs.forEach(t => {
+          t.classList.toggle('active', t === tab);
+          t.setAttribute('aria-selected', t === tab ? 'true' : 'false');
+          t.tabIndex = t === tab ? 0 : -1;
+        });
       });
     });
 
-    // Ouvrir/fermer barre de recherche
-    openSearchBtn.addEventListener('click', () => {
-      if (searchBar.style.display === 'flex') {
-        searchBar.style.display = 'none';
-      } else {
-        searchBar.style.display = 'flex';
-        cityInput.focus();
+    // Swipe detection (gauche/droite) sur #app
+    let touchStartX = 0;
+    let touchEndX = 0;
+
+    function handleGesture() {
+      const deltaX = touchEndX - touchStartX;
+      if (Math.abs(deltaX) > 50) {
+        // Sens du swipe
+        if (deltaX < 0) {
+          // swipe vers la gauche: home -> humid
+          switchToScreen('humid');
+        } else {
+          // swipe vers la droite: humid -> home
+          switchToScreen('home');
+        }
       }
+    }
+
+    function switchToScreen(screenId) {
+      screens.forEach(screen => {
+        screen.classList.toggle('active', screen.id === screenId);
+      });
+      tabs.forEach(t => {
+        const isActive = t.dataset.screen === screenId;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        t.tabIndex = isActive ? 0 : -1;
+      });
+    }
+
+    const app = document.getElementById('app');
+    app.addEventListener('touchstart', e => {
+      touchStartX = e.changedTouches[0].screenX;
+    });
+    app.addEventListener('touchend', e => {
+      touchEndX = e.changedTouches[0].screenX;
+      handleGesture();
     });
 
-    // Rechercher une ville
-    async function searchCity(city) {
+    // Vigilance et précautions personnalisées selon la température
+    function updateVigilance(temp) {
+      let text = '';
+      let color = '';
+      let precaution = '';
+
+      if (temp < 20) {
+        text = 'Vigilance Verte';
+        color = 'rgba(0,128,0,0.7)';
+        precaution = 'Conditions normales, aucune précaution spécifique.';
+      } else if (temp < 25) {
+        text = 'Vigilance Jaune';
+        color = 'rgba(255,255,0,0.7)';
+        precaution = 'Restez vigilant, évitez les efforts physiques intenses.';
+      } else if (temp < 30) {
+        text = 'Vigilance Orange';
+        color = 'rgba(255,165,0,0.7)';
+        precaution = 'Hydratez-vous régulièrement et limitez l\'exposition au soleil.';
+      } else {
+        text = 'Vigilance Rouge';
+        color = 'rgba(255,0,0,0.7)';
+        precaution = 'Restez au frais, évitez les sorties prolongées et surveillez les personnes vulnérables.';
+      }
+
+      vigilanceElem.innerHTML = `<strong>${text}</strong><br>${precaution}`;
+      vigilanceElem.style.backgroundColor = color;
+    }
+
+    // Mise à jour météo et vigilance
+    function updateWeather(data) {
+      if (!data || !data.main || !data.weather) {
+        locElem.textContent = 'Ville non trouvée';
+        tempElem.textContent = '--°C';
+        descElem.textContent = '---';
+        vigilanceElem.textContent = '';
+        vigilanceElem.style.backgroundColor = 'transparent';
+        humidityValElem.textContent = '--%';
+        return;
+      }
+      locElem.textContent = `${data.name}, ${data.sys.country}`;
+      const temp = Math.round(data.main.temp);
+      tempElem.textContent = `${temp}°C`;
+      descElem.textContent = data.weather[0].description;
+      humidityValElem.textContent = `${data.main.humidity}%`;
+
+      updateVigilance(temp);
+
+      // Change background gradient selon météo (simple exemple)
+      const weatherId = data.weather[0].id;
+      if (weatherId >= 200 && weatherId < 600) {
+        // Pluie, orage, neige
+        bgHome.style.background = 'linear-gradient(to bottom, #374e72, #0f2027)';
+        bgHumid.style.background = 'linear-gradient(to bottom, #374e72, #0f2027)';
+      } else if (weatherId >= 600 && weatherId < 700) {
+        // Neige
+        bgHome.style.background = 'linear-gradient(to bottom, #83a4d4, #b6fbff)';
+        bgHumid.style.background = 'linear-gradient(to bottom, #83a4d4, #b6fbff)';
+      } else if (weatherId === 800) {
+        // Clair
+        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
+        bgHumid.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
+      } else {
+        // Nuageux ou autre
+        bgHome.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
+        bgHumid.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
+      }
+    }
+
+    // Requête API météo
+    async function fetchWeather(city) {
       try {
         const res = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${apiKey}`
         );
-        if (!res.ok) throw new Error('Ville non trouvée');
         const data = await res.json();
+        if (data.cod !== 200) throw new Error(data.message);
         updateWeather(data);
-        searchBar.style.display = 'none';
-      } catch (err) {
-        alert(err.message);
+      } catch (error) {
+        alert('Erreur API : ' + error.message);
       }
     }
 
-    // Met à jour l'interface météo
-    function updateWeather(data) {
-      locElem.textContent = `${data.name}, ${data.sys.country}`;
-      tempElem.textContent = `${Math.round(data.main.temp)}°C`;
-      descElem.textContent = data.weather[0].description;
-      humidityValElem.textContent = `${data.main.humidity}%`;
+    // Recherche
+    const openSearchBtn = document.getElementById('openSearchBtn');
+    const searchBar = document.getElementById('searchBar');
+    const cityInput = document.getElementById('cityInput');
+    const searchBtn = document.getElementById('searchBtn');
 
-      // Couleur de fond selon temps
-      const main = data.weather[0].main.toLowerCase();
-      if (main.includes('cloud')) {
-        bgHome.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #757f9a, #d7dde8)';
-      } else if (main.includes('rain') || main.includes('drizzle')) {
-        bgHome.style.background = 'linear-gradient(to bottom, #3a7bd5, #3a6073)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #3a7bd5, #3a6073)';
-      } else if (main.includes('clear')) {
-        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-      } else if (main.includes('snow')) {
-        bgHome.style.background = 'linear-gradient(to bottom, #e0eafc, #cfdef3)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #e0eafc, #cfdef3)';
-      } else {
-        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-        bgHumid.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-      }
-    }
+    openSearchBtn.addEventListener('click', () => {
+      searchBar.style.display = searchBar.style.display === 'flex' ? 'none' : 'flex';
+      if (searchBar.style.display === 'flex') cityInput.focus();
+    });
 
-    // Événement recherche bouton
     searchBtn.addEventListener('click', () => {
       const city = cityInput.value.trim();
-      if (city) {
-        searchCity(city);
+      if (city.length > 0) {
+        fetchWeather(city);
+        searchBar.style.display = 'none';
+        cityInput.value = '';
       }
     });
 
-    // Rechercher en appuyant sur Entrée
-    cityInput.addEventListener('keydown', e => {
+    cityInput.addEventListener('keypress', e => {
       if (e.key === 'Enter') {
         searchBtn.click();
       }
     });
 
-    // Chargement initial météo Paris
-    searchCity('Paris');
-
-    // Gestion swipe
-    let touchStartX = 0;
-    let touchEndX = 0;
-    const minSwipeDistance = 50;
-
-    function handleSwipe() {
-      const deltaX = touchEndX - touchStartX;
-      if (Math.abs(deltaX) > minSwipeDistance) {
-        if (deltaX > 0) {
-          // swipe right
-          if (homeScreen.classList.contains('active')) {
-            switchToScreen(1);
-          } else {
-            switchToScreen(0);
-          }
-        } else {
-          // swipe left
-          if (homeScreen.classList.contains('active')) {
-            switchToScreen(1);
-          } else {
-            switchToScreen(0);
-          }
-        }
-      }
-    }
-
-    const appElem = document.getElementById('app');
-    appElem.addEventListener('touchstart', (e) => {
-      touchStartX = e.changedTouches[0].screenX;
-    });
-    appElem.addEventListener('touchend', (e) => {
-      touchEndX = e.changedTouches[0].screenX;
-      handleSwipe();
-    });
+    // Au chargement, afficher météo d'une ville par défaut
+    fetchWeather('Paris');
   </script>
 </body>
 </html>
