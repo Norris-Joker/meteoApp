@@ -3,22 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Météo MIUI - Humidité</title>
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=MiSans:wght@200;300;400;500;600&display=swap"
-  />
+  <title>Météo MIUI</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=MiSans:wght@200;300;400;500;600&display=swap" />
   <style>
-    /* Reset global */
-    *,
-    *::before,
-    *::after {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-    html,
-    body {
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -35,26 +24,20 @@
     }
     .screen {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      transition: transform 0.4s ease;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      /* transition removed */
       transform: translateX(100%);
-      touch-action: none;
-      display: flex;
-      flex-direction: column;
+      display: flex; flex-direction: column;
     }
-    .screen.active {
+    .screen.active { 
       transform: translateX(0%);
+      display: flex;
     }
-    .bg,
-    .overlay {
+    .bg, .overlay {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
     }
     .bg {
       background: linear-gradient(to bottom, #4facfe, #00f2fe);
@@ -77,70 +60,72 @@
       align-items: flex-start;
       padding-left: 20px;
       z-index: 2;
-      user-select: none;
     }
-    #loc {
-      font-size: 16px;
-      font-weight: 600;
-      opacity: 0.9;
-      margin-bottom: 4px;
-      line-height: 1.2;
-    }
-    .big {
-      font-size: 120px;
-      font-weight: 200;
-      line-height: 1;
-      animation: fadeIn 1s ease;
-      text-align: left;
-    }
-    #desc {
-      font-size: 20px;
-      font-weight: 500;
-      margin-top: 8px;
-      padding-left: 4px;
-      color: #fff;
-    }
+    #loc { font-size: 16px; font-weight: 600; opacity: 0.9; margin-bottom: 4px; }
+    .big { font-size: 120px; font-weight: 200; line-height: 1; animation: fadeIn 1s ease; }
+    #desc { font-size: 20px; font-weight: 500; margin-top: 8px; padding-left: 4px; }
     #vigilance {
       margin-top: 140px;
       padding: 12px 16px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
-      color: #fff;
       font-weight: 600;
       max-width: 90%;
-      user-select: none;
-      line-height: 1.3;
     }
-
+    #forecastList {
+      margin-top: 80px;
+      padding-left: 20px;
+      width: 100%;
+      overflow-y: auto;
+      flex-grow: 1;
+      color: #eee;
+      font-size: 14px;
+    }
+    #forecastList ul {
+      list-style: none;
+    }
+    #forecastList li {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(255 255 255 / 0.1);
+      margin-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    #forecastList li .time {
+      font-weight: 600;
+      width: 80px;
+    }
+    #forecastList li .desc {
+      flex-grow: 1;
+      text-align: center;
+    }
+    #forecastList li .temp {
+      font-weight: 700;
+      width: 50px;
+      text-align: right;
+    }
     @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(20px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
     .tab-bar {
-      position: absolute;
-      bottom: 0;
-      left: 0;
+      position: absolute; bottom: 0; left: 0;
       width: 100%;
       display: flex;
       background: rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(16px);
       z-index: 2;
+      font-weight: 600;
     }
     .tab {
-      flex: 1;
-      text-align: center;
+      flex: 1; text-align: center;
       padding: 12px 0;
       font-size: 14px;
-      font-weight: 500;
       cursor: pointer;
-      user-select: none;
       position: relative;
+      color: #fff;
     }
     .tab.active {
       color: #4facfe;
@@ -155,17 +140,6 @@
       background: #4facfe;
       border-radius: 1px;
     }
-    #humid .header {
-      position: absolute;
-      top: calc(env(safe-area-inset-top) + 16px);
-      width: 100%;
-      text-align: center;
-      z-index: 2;
-    }
-    #humid .header .title {
-      font-size: 18px;
-      font-weight: 600;
-    }
     #topButtons {
       position: fixed;
       top: calc(env(safe-area-inset-top) + 16px);
@@ -173,8 +147,6 @@
       z-index: 10;
       display: flex;
       gap: 12px;
-      user-select: none;
-      pointer-events: auto;
     }
     .btn {
       cursor: pointer;
@@ -185,73 +157,26 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      color: #fff;
       font-size: 24px;
       font-weight: 700;
       transition: background 0.3s ease;
-      user-select: none;
-      pointer-events: auto;
       border: none;
-    }
-    .btn:hover {
-      background: rgba(255 255 255 / 0.4);
-    }
-    .icon-gear {
-      width: 20px;
-      height: 20px;
-      fill: currentColor;
-    }
-    #searchBar {
-      position: fixed;
-      top: calc(env(safe-area-inset-top) + 60px);
-      right: 16px;
-      z-index: 11;
-      background: rgba(255 255 255 / 0.1);
-      padding: 8px;
-      border-radius: 12px;
-      display: none;
-      align-items: center;
-      gap: 6px;
-      user-select: text;
-    }
-    #searchBar input {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: none;
-      outline: none;
-      width: 140px;
-      font-size: 14px;
-      background: rgba(255 255 255 / 0.3);
       color: #fff;
     }
-    #searchBar button {
-      padding: 6px 10px;
-      border-radius: 8px;
-      border: none;
-      background: rgba(255 255 255 / 0.3);
-      color: #fff;
-      cursor: pointer;
-      font-weight: 600;
-      user-select: none;
-      transition: background 0.3s ease;
-    }
-    #searchBar button:hover {
-      background: rgba(255 255 255 / 0.5);
-    }
-
-    /* Styles pour la page de recherche */
+    .btn:hover { background: rgba(255 255 255 / 0.4); }
+    .icon-gear { width: 20px; height: 20px; fill: currentColor; }
     #searchPage .header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       padding: 12px 20px;
       position: fixed;
-      top: calc(env(safe-area-inset-top) + 0);
+      top: 0;
       width: 100%;
       background: rgba(0, 0, 0, 0.5);
       z-index: 12;
     }
-    #searchPage #searchInputPage {
+    #searchInputPage {
       flex: 1;
       padding: 8px 12px;
       border-radius: 8px;
@@ -262,36 +187,28 @@
       outline: none;
     }
     #savedCities {
-      margin-top: 72px; /* sous la barre */
+      margin-top: 72px;
       padding: 16px 20px;
-      flex: 1;
       overflow-y: auto;
-      user-select: none;
+      flex-grow: 1;
+      color: #eee;
     }
-    #savedCities ul {
-      list-style: none;
-    }
+    #savedCities ul { list-style: none; }
     #savedCities li {
       padding: 10px 12px;
       border-radius: 8px;
       background: rgba(255 255 255 / 0.1);
       margin-bottom: 10px;
       cursor: pointer;
-      user-select: none;
       transition: background 0.3s ease;
     }
-    #savedCities li:hover {
-      background: rgba(255 255 255 / 0.3);
-    }
-
-    /* Classe pour cacher les boutons + et paramètres */
-    .hidden {
-      display: none !important;
-    }
+    #savedCities li:hover { background: rgba(255 255 255 / 0.3); }
+    .hidden { display: none !important; }
   </style>
 </head>
 <body>
   <div id="app">
+    <!-- Ecran Météo -->
     <section id="home" class="screen active">
       <div class="bg" id="bgHome"></div>
       <div class="overlay"></div>
@@ -303,194 +220,222 @@
       </div>
     </section>
 
-    <section id="humid" class="screen">
-      <div class="bg"></div>
+    <!-- Ecran Prévisions -->
+    <section id="forecast" class="screen">
+      <div class="bg" id="bgForecast"></div>
       <div class="overlay"></div>
-      <div class="header">
-        <div class="title">Humidité</div>
-      </div>
       <div class="main">
-        <div id="humidityValue" style="font-size: 80px; font-weight: 300;">--%</div>
+        <div id="locForecast" style="font-weight:600; font-size:18px; margin-bottom:8px;">Prévisions 24h</div>
+        <div id="forecastList"><ul></ul></div>
       </div>
     </section>
 
+    <!-- Ecran Recherche -->
     <section id="searchPage" class="screen">
       <div class="header">
         <input type="text" id="searchInputPage" placeholder="Rechercher une ville..." />
-        <button id="searchBtnPage">OK</button>
-        <button id="backFromSearchBtn" style="margin-left:12px;">Retour</button>
       </div>
-      <div id="savedCities">
-        <!-- Liste villes sauvegardées -->
-      </div>
+      <div id="savedCities"></div>
     </section>
 
+    <!-- Boutons haut droite -->
     <div id="topButtons">
-      <button id="openSearchBtn" class="btn">+</button>
-      <button class="btn" title="Paramètres">
+      <button id="openSearchBtn" class="btn" title="Ajouter une ville">+</button>
+      <button id="settingsBtn" class="btn" title="Paramètres">
         <svg class="icon-gear" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm6.832 3a6.993 6.993 0 0 0-.62-1.501l2.036-2.036-1.414-1.414-2.036 2.036a6.993 6.993 0 0 0-1.5-.62V4h-2v2.465a6.993 6.993 0 0 0-1.501.62L9.999 4.65 8.585 6.065l2.036 2.036a6.993 6.993 0 0 0-.62 1.5H4v2h2.465a6.993 6.993 0 0 0 .62 1.501L4.65 14.001l1.414 1.414 2.036-2.036a6.993 6.993 0 0 0 1.5.62V20h2v-2.465a6.993 6.993 0 0 0 1.501-.62l2.036 2.036 1.414-1.414-2.036-2.036a6.993 6.993 0 0 0 .62-1.5H20v-2h-1.168z"/></svg>
       </button>
     </div>
 
+    <!-- Barre du bas avec onglets -->
     <div class="tab-bar">
       <div class="tab active" data-screen="home">Météo</div>
-      <div class="tab" data-screen="humid">Humidité</div>
+      <div class="tab" data-screen="forecast">Prévision</div>
     </div>
   </div>
 
   <script>
     const OPENWEATHERMAP_API_KEY = 'f570ba4a8945e02cc0cdf9bb166d14e1';
 
-    // Sélection des éléments
     const screens = document.querySelectorAll('.screen');
     const homeScreen = document.getElementById('home');
-    const humidScreen = document.getElementById('humid');
+    const forecastScreen = document.getElementById('forecast');
     const searchPage = document.getElementById('searchPage');
     const topButtons = document.getElementById('topButtons');
+
     const openSearchBtn = document.getElementById('openSearchBtn');
-    const backFromSearchBtn = document.getElementById('backFromSearchBtn');
+    const settingsBtn = document.getElementById('settingsBtn');
+
     const tabs = document.querySelectorAll('.tab');
 
     const searchInputPage = document.getElementById('searchInputPage');
-    const searchBtnPage = document.getElementById('searchBtnPage');
     const loc = document.getElementById('loc');
     const temp = document.getElementById('temp');
     const desc = document.getElementById('desc');
     const vigilance = document.getElementById('vigilance');
-    const bgHome = document.getElementById('bgHome');
+    const locForecast = document.getElementById('locForecast');
+    const forecastList = document.querySelector('#forecastList ul');
+
     const savedCitiesContainer = document.getElementById('savedCities');
 
-    // Liste des villes sauvegardées (en mémoire)
-    let savedCities = [];
-
-    // Fonction pour afficher la liste des villes sous la barre recherche
-    function renderSavedCities() {
-      savedCitiesContainer.innerHTML = '';
-      if (savedCities.length === 0) {
-        savedCitiesContainer.innerHTML = '<p style="opacity: 0.5;">Aucune ville sauvegardée</p>';
-        return;
+    // Gestion des écrans
+    function showScreen(id) {
+      screens.forEach(s => s.classList.remove('active'));
+      searchPage.classList.remove('active');
+      if (id === 'searchPage') {
+        searchPage.classList.add('active');
+      } else {
+        const screen = document.getElementById(id);
+        if (screen) screen.classList.add('active');
       }
-      const ul = document.createElement('ul');
-      savedCities.forEach(city => {
-        const li = document.createElement('li');
-        li.textContent = city;
-        li.addEventListener('click', () => {
-          fetchWeather(city);
-          // Retour automatique à l'accueil quand on clique sur une ville
-          screens.forEach(s => s.classList.remove('active'));
-          homeScreen.classList.add('active');
-          topButtons.classList.remove('hidden');
-          tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
-        });
-        ul.appendChild(li);
-      });
-      savedCitiesContainer.appendChild(ul);
+      // Si on quitte recherche, on remet les boutons visibles
+      if (id !== 'searchPage') {
+        topButtons.style.display = 'flex';
+      }
     }
 
-    // Gestion des onglets Météo / Humidité
+    // Onglets bas
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const screenName = tab.dataset.screen;
-        if (screenName === 'home') {
-          screens.forEach(s => s.classList.remove('active'));
-          homeScreen.classList.add('active');
-          topButtons.classList.remove('hidden');
-        } else if (screenName === 'humid') {
-          screens.forEach(s => s.classList.remove('active'));
-          humidScreen.classList.add('active');
-          topButtons.classList.remove('hidden');
-        }
-        tabs.forEach(t => t.classList.toggle('active', t === tab));
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        showScreen(tab.dataset.screen);
+        // Cacher page recherche si ouverte
+        searchPage.classList.remove('active');
       });
     });
 
-    // Ouvrir la page recherche
+    // Bouton + ouvre recherche, cache + et paramètres
     openSearchBtn.addEventListener('click', () => {
-      screens.forEach(s => s.classList.remove('active'));
-      searchPage.classList.add('active');
-      topButtons.classList.add('hidden'); // cacher boutons + et paramètres
-      renderSavedCities();
+      showScreen('searchPage');
+      topButtons.style.display = 'none';
       searchInputPage.focus();
+      loadSavedCities();
     });
 
-    // Retour à l'accueil depuis la recherche
-    backFromSearchBtn.addEventListener('click', () => {
-      screens.forEach(s => s.classList.remove('active'));
-      homeScreen.classList.add('active');
-      topButtons.classList.remove('hidden'); // réafficher boutons
-      tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
+    // Remplir les villes sauvegardées (localStorage)
+    function loadSavedCities() {
+      let cities = JSON.parse(localStorage.getItem('savedCities')) || [];
+      if (cities.length === 0) {
+        savedCitiesContainer.innerHTML = '<p style="padding:16px; color:#aaa;">Aucune ville sauvegardée</p>';
+        return;
+      }
+      let html = '<ul>';
+      cities.forEach(city => {
+        html += `<li data-city="${city}">${city}</li>`;
+      });
+      html += '</ul>';
+      savedCitiesContainer.innerHTML = html;
+
+      // Clic sur ville sauvegardée : charge météo et revient à l’écran météo
+      savedCitiesContainer.querySelectorAll('li').forEach(li => {
+        li.addEventListener('click', () => {
+          loadWeather(li.dataset.city);
+          showScreen('home');
+          setActiveTab('home');
+          topButtons.style.display = 'flex';
+        });
+      });
+    }
+
+    // Met à jour l'onglet actif (bas)
+    function setActiveTab(id) {
+      tabs.forEach(t => t.classList.remove('active'));
+      const tab = Array.from(tabs).find(t => t.dataset.screen === id);
+      if (tab) tab.classList.add('active');
+    }
+
+    // Recherche avec entrée dans la page recherche
+    searchInputPage.addEventListener('keypress', e => {
+      if (e.key === 'Enter') {
+        const city = searchInputPage.value.trim();
+        if (city) {
+          saveCity(city);
+          loadWeather(city);
+          showScreen('home');
+          setActiveTab('home');
+          topButtons.style.display = 'flex';
+          searchInputPage.value = '';
+        }
+      }
     });
 
-    // Fonction pour récupérer la météo via API et mettre à jour l'interface
-    async function fetchWeather(city) {
-      try {
-        const apiKey = OPENWEATHERMAP_API_KEY;
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=fr`;
-        const response = await fetch(url);
-        if (!response.ok) {
-          alert("Ville non trouvée ou erreur API.");
-          return;
-        }
-        const data = await response.json();
-
-        // Mise à jour interface
-        loc.textContent = `${data.name}, ${data.sys.country}`;
-        temp.textContent = `${Math.round(data.main.temp)}°C`;
-        desc.textContent = data.weather[0].description;
-
-        // Changement de fond selon météo
-        const mainWeather = data.weather[0].main.toLowerCase();
-        if (mainWeather.includes('cloud')) {
-          bgHome.style.background = 'linear-gradient(to bottom, #636363, #a2ab58)';
-        } else if (mainWeather.includes('rain')) {
-          bgHome.style.background = 'linear-gradient(to bottom, #000046, #1cb5e0)';
-        } else {
-          bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
-        }
-
-        // Ajouter la ville à la liste si pas déjà présente
-        const cityName = data.name;
-        if (!savedCities.includes(cityName)) {
-          savedCities.push(cityName);
-        }
-
-        // Rafraîchir liste affichée si sur page recherche
-        if (searchPage.classList.contains('active')) {
-          renderSavedCities();
-        }
-
-      } catch (error) {
-        alert("Erreur lors de la récupération des données météo.");
-        console.error(error);
+    // Sauvegarder ville dans localStorage
+    function saveCity(city) {
+      let cities = JSON.parse(localStorage.getItem('savedCities')) || [];
+      if (!cities.includes(city)) {
+        cities.push(city);
+        localStorage.setItem('savedCities', JSON.stringify(cities));
       }
     }
 
-    // Recherche déclenchée via bouton OK dans page recherche
-    searchBtnPage.addEventListener('click', () => {
-      const city = searchInputPage.value.trim();
-      if (!city) {
-        alert('Veuillez entrer un nom de ville.');
-        return;
+    // Charger météo actuelle (ville)
+    async function loadWeather(city) {
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${OPENWEATHERMAP_API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Ville non trouvée');
+        const data = await res.json();
+        updateWeatherUI(data);
+        loadForecast(city); // Charge aussi les prévisions
+      } catch (err) {
+        alert('Erreur météo : ' + err.message);
       }
-      fetchWeather(city).then(() => {
-        // Après recherche, retour à l'écran météo
-        screens.forEach(s => s.classList.remove('active'));
-        homeScreen.classList.add('active');
-        topButtons.classList.remove('hidden');
-        tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
-        searchInputPage.value = '';
-      });
-    });
+    }
 
-    // Permet recherche via touche Enter dans input
-    searchInputPage.addEventListener('keyup', (e) => {
-      if (e.key === 'Enter') {
-        searchBtnPage.click();
+    // Met à jour interface météo
+    function updateWeatherUI(data) {
+      loc.textContent = data.name + ', ' + (data.sys.country || '');
+      temp.textContent = Math.round(data.main.temp) + '°C';
+      desc.textContent = data.weather[0].description;
+      vigilance.textContent = ''; // À adapter si tu veux mettre vigilance
+    }
+
+    // Charger prévisions 24h (3h par 3h) pour la ville
+    async function loadForecast(city) {
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${OPENWEATHERMAP_API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('Prévisions non disponibles');
+        const data = await res.json();
+        locForecast.textContent = `Prévisions 24h pour ${data.city.name}, ${data.city.country}`;
+        updateForecastUI(data.list);
+      } catch (err) {
+        alert('Erreur prévisions : ' + err.message);
       }
-    });
+    }
 
-    // Init avec une ville par défaut
-    fetchWeather('Paris');
+    // Met à jour liste prévisions
+    function updateForecastUI(list) {
+      forecastList.innerHTML = '';
+      // On affiche max 8 prévisions (3h * 8 = 24h)
+      const maxCount = 8;
+      for (let i = 0; i < maxCount && i < list.length; i++) {
+        const f = list[i];
+        const date = new Date(f.dt * 1000);
+        const h = date.getHours().toString().padStart(2, '0');
+        const m = date.getMinutes().toString().padStart(2, '0');
+        const timeStr = `${h}h${m}`;
+        const desc = f.weather[0].description;
+        const temp = Math.round(f.main.temp);
+        const icon = `https://openweathermap.org/img/wn/${f.weather[0].icon}@2x.png`;
+
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <div class="time">${timeStr}</div>
+          <div class="desc"><img src="${icon}" alt="${desc}" style="height:32px; vertical-align:middle;"> ${desc}</div>
+          <div class="temp">${temp}°C</div>
+        `;
+        forecastList.appendChild(li);
+      }
+    }
+
+    // Au lancement, on charge Paris par défaut
+    loadWeather('Paris');
+
+    // Settings bouton : juste alert pour l'instant
+    settingsBtn.addEventListener('click', () => {
+      alert('Paramètres non implémentés pour le moment.');
+    });
   </script>
 </body>
 </html>
