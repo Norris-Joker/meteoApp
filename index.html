@@ -42,6 +42,8 @@
       transition: transform 0.4s ease;
       transform: translateX(100%);
       touch-action: none;
+      display: flex;
+      flex-direction: column;
     }
     .screen.active {
       transform: translateX(0%);
@@ -189,6 +191,7 @@
       transition: background 0.3s ease;
       user-select: none;
       pointer-events: auto;
+      border: none;
     }
     .btn:hover {
       background: rgba(255 255 255 / 0.4);
@@ -235,6 +238,56 @@
     #searchBar button:hover {
       background: rgba(255 255 255 / 0.5);
     }
+
+    /* Styles pour la page de recherche */
+    #searchPage .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 20px;
+      position: fixed;
+      top: calc(env(safe-area-inset-top) + 0);
+      width: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 12;
+    }
+    #searchPage #searchInputPage {
+      flex: 1;
+      padding: 8px 12px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      background: rgba(255 255 255 / 0.2);
+      color: #fff;
+      outline: none;
+    }
+    #savedCities {
+      margin-top: 72px; /* sous la barre */
+      padding: 16px 20px;
+      flex: 1;
+      overflow-y: auto;
+      user-select: none;
+    }
+    #savedCities ul {
+      list-style: none;
+    }
+    #savedCities li {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: rgba(255 255 255 / 0.1);
+      margin-bottom: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.3s ease;
+    }
+    #savedCities li:hover {
+      background: rgba(255 255 255 / 0.3);
+    }
+
+    /* Classe pour cacher les boutons + et paramètres */
+    .hidden {
+      display: none !important;
+    }
   </style>
 </head>
 <body>
@@ -245,179 +298,199 @@
       <div class="main">
         <div id="loc">Ville</div>
         <div class="big" id="temp">--°C</div>
-        <div id="desc">---</div>
-        <div id="vigilance" class="sub"></div>
+        <div id="desc">Description</div>
+        <div id="vigilance">Vigilance météo...</div>
       </div>
-      <nav class="tab-bar">
-        <div class="tab active" data-screen="home">Météo</div>
-        <div class="tab" data-screen="humid">Humidité</div>
-      </nav>
     </section>
+
     <section id="humid" class="screen">
-      <div class="bg" id="bgHumid"></div>
+      <div class="bg"></div>
       <div class="overlay"></div>
       <div class="header">
         <div class="title">Humidité</div>
       </div>
       <div class="main">
-        <div class="big" id="humidityVal">--%</div>
+        <div id="humidityValue" style="font-size: 80px; font-weight: 300;">--%</div>
       </div>
-      <nav class="tab-bar">
-        <div class="tab" data-screen="home">Météo</div>
-        <div class="tab active" data-screen="humid">Humidité</div>
-      </nav>
     </section>
-  </div>
 
-  <div id="topButtons">
-    <div id="openSearchBtn" class="btn" title="Rechercher">+</div>
-    <div id="settingsBtn" class="btn" title="Paramètres" aria-label="Paramètres">
-      <svg class="icon-gear" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-        <path
-          d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7zm7.43-2.44l1.77-1.36-1.52-2.63-2.12.35a6.98 6.98 0 0 0-1.6-1.14l-.31-2.24-3.04.47-.73 2.14a7.09 7.09 0 0 0-2.17 0l-.72-2.14-3.04-.48-.31 2.25a6.9 6.9 0 0 0-1.6 1.14l-2.11-.35-1.52 2.63 1.76 1.35a7.18 7.18 0 0 0 0 2.88l-1.76 1.35 1.52 2.64 2.11-.35c.46.42 1 .75 1.6 1.14l.31 2.24 3.04.47.72-2.14a7.09 7.09 0 0 0 2.17 0l.72 2.14 3.04.48.31-2.25a6.9 6.9 0 0 0 1.6-1.14l2.11.35 1.52-2.64-1.76-1.35a7.18 7.18 0 0 0 0-2.88z"
-        ></path>
-      </svg>
+    <section id="searchPage" class="screen">
+      <div class="header">
+        <input type="text" id="searchInputPage" placeholder="Rechercher une ville..." />
+        <button id="searchBtnPage">OK</button>
+        <button id="backFromSearchBtn" style="margin-left:12px;">Retour</button>
+      </div>
+      <div id="savedCities">
+        <!-- Liste villes sauvegardées -->
+      </div>
+    </section>
+
+    <div id="topButtons">
+      <button id="openSearchBtn" class="btn">+</button>
+      <button class="btn" title="Paramètres">
+        <svg class="icon-gear" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm6.832 3a6.993 6.993 0 0 0-.62-1.501l2.036-2.036-1.414-1.414-2.036 2.036a6.993 6.993 0 0 0-1.5-.62V4h-2v2.465a6.993 6.993 0 0 0-1.501.62L9.999 4.65 8.585 6.065l2.036 2.036a6.993 6.993 0 0 0-.62 1.5H4v2h2.465a6.993 6.993 0 0 0 .62 1.501L4.65 14.001l1.414 1.414 2.036-2.036a6.993 6.993 0 0 0 1.5.62V20h2v-2.465a6.993 6.993 0 0 0 1.501-.62l2.036 2.036 1.414-1.414-2.036-2.036a6.993 6.993 0 0 0 .62-1.5H20v-2h-1.168z"/></svg>
+      </button>
+    </div>
+
+    <div class="tab-bar">
+      <div class="tab active" data-screen="home">Météo</div>
+      <div class="tab" data-screen="humid">Humidité</div>
     </div>
   </div>
 
-  <div id="searchBar">
-    <input id="searchInput" type="text" placeholder="Ville..." aria-label="Recherche de ville" />
-    <button id="searchBtn">OK</button>
-  </div>
-
   <script>
-    // --- Variables ---
-    const locEl = document.getElementById('loc');
-    const tempEl = document.getElementById('temp');
-    const descEl = document.getElementById('desc');
-    const vigilanceEl = document.getElementById('vigilance');
-    const humidityValEl = document.getElementById('humidityVal');
+    const OPENWEATHERMAP_API_KEY = 'f570ba4a8945e02cc0cdf9bb166d14e1';
+
+    // Sélection des éléments
+    const screens = document.querySelectorAll('.screen');
+    const homeScreen = document.getElementById('home');
+    const humidScreen = document.getElementById('humid');
+    const searchPage = document.getElementById('searchPage');
+    const topButtons = document.getElementById('topButtons');
+    const openSearchBtn = document.getElementById('openSearchBtn');
+    const backFromSearchBtn = document.getElementById('backFromSearchBtn');
+    const tabs = document.querySelectorAll('.tab');
+
+    const searchInputPage = document.getElementById('searchInputPage');
+    const searchBtnPage = document.getElementById('searchBtnPage');
+    const loc = document.getElementById('loc');
+    const temp = document.getElementById('temp');
+    const desc = document.getElementById('desc');
+    const vigilance = document.getElementById('vigilance');
     const bgHome = document.getElementById('bgHome');
-    const bgHumid = document.getElementById('bgHumid');
+    const savedCitiesContainer = document.getElementById('savedCities');
 
-    // Pour demo : météo fictive
-    let temperature = 22; // °C
-    let description = 'Dégagé';
-    let humidity = 60;
+    // Liste des villes sauvegardées (en mémoire)
+    let savedCities = [];
 
-    // Met à jour la vigilance selon température
-    function updateVigilance(temp) {
-      if (temp >= 35) {
-        vigilanceEl.textContent = '⚠️ Chaleur extrême, restez hydraté !';
-        bgHome.style.background = 'linear-gradient(to bottom, #ff512f, #dd2476)';
-      } else if (temp >= 25) {
-        vigilanceEl.textContent = '🌞 Temps chaud, pensez à vous protéger.';
-        bgHome.style.background = 'linear-gradient(to bottom, #f7971e, #ffd200)';
-      } else if (temp <= 0) {
-        vigilanceEl.textContent = '❄️ Froid intense, habillez-vous chaudement.';
-        bgHome.style.background = 'linear-gradient(to bottom, #2980b9, #6dd5fa)';
-      } else {
-        vigilanceEl.textContent = '';
-        bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
+    // Fonction pour afficher la liste des villes sous la barre recherche
+    function renderSavedCities() {
+      savedCitiesContainer.innerHTML = '';
+      if (savedCities.length === 0) {
+        savedCitiesContainer.innerHTML = '<p style="opacity: 0.5;">Aucune ville sauvegardée</p>';
+        return;
       }
+      const ul = document.createElement('ul');
+      savedCities.forEach(city => {
+        const li = document.createElement('li');
+        li.textContent = city;
+        li.addEventListener('click', () => {
+          fetchWeather(city);
+          // Retour automatique à l'accueil quand on clique sur une ville
+          screens.forEach(s => s.classList.remove('active'));
+          homeScreen.classList.add('active');
+          topButtons.classList.remove('hidden');
+          tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
+        });
+        ul.appendChild(li);
+      });
+      savedCitiesContainer.appendChild(ul);
     }
 
-    // --- Gestion des onglets ---
-    const tabs = document.querySelectorAll('.tab-bar .tab');
+    // Gestion des onglets Météo / Humidité
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
-        const screenToShow = tab.dataset.screen;
-        document.querySelectorAll('.screen').forEach(screen => {
-          screen.classList.remove('active');
-        });
-        document.getElementById(screenToShow).classList.add('active');
-
-        tabs.forEach(t => t.classList.remove('active'));
-        document.querySelectorAll(`.tab[data-screen="${screenToShow}"]`).forEach(t => t.classList.add('active'));
+        const screenName = tab.dataset.screen;
+        if (screenName === 'home') {
+          screens.forEach(s => s.classList.remove('active'));
+          homeScreen.classList.add('active');
+          topButtons.classList.remove('hidden');
+        } else if (screenName === 'humid') {
+          screens.forEach(s => s.classList.remove('active'));
+          humidScreen.classList.add('active');
+          topButtons.classList.remove('hidden');
+        }
+        tabs.forEach(t => t.classList.toggle('active', t === tab));
       });
     });
 
-    // --- Swipe entre écrans ---
-    let startX = 0;
-    let currentScreen = 'home';
-
-    document.getElementById('app').addEventListener('touchstart', e => {
-      startX = e.touches[0].clientX;
-    });
-    document.getElementById('app').addEventListener('touchend', e => {
-      const endX = e.changedTouches[0].clientX;
-      const diffX = endX - startX;
-      if (Math.abs(diffX) > 50) {
-        if (diffX < 0 && currentScreen === 'home') {
-          // Vers humid
-          currentScreen = 'humid';
-        } else if (diffX > 0 && currentScreen === 'humid') {
-          currentScreen = 'home';
-        }
-        document.querySelectorAll('.screen').forEach(screen => {
-          screen.classList.remove('active');
-        });
-        document.getElementById(currentScreen).classList.add('active');
-
-        tabs.forEach(t => t.classList.remove('active'));
-        document.querySelectorAll(`.tab[data-screen="${currentScreen}"]`).forEach(t => t.classList.add('active'));
-      }
-    });
-
-    // --- Affichage météo initial ---
-    function updateUI(temp, desc, hum) {
-      locEl.textContent = 'Paris, FR';
-      tempEl.textContent = `${Math.round(temp)}°C`;
-      descEl.textContent = desc;
-      humidityValEl.textContent = `${hum}%`;
-      updateVigilance(temp);
-    }
-    updateUI(temperature, description, humidity);
-
-    // --- Recherche de ville et mise à jour météo ---
-    const apiKey = 'f570ba4a8945e02cc0cdf9bb166d14e1'; // Mets ta clé API ici
-
-    const openSearchBtn = document.getElementById('openSearchBtn');
-    const searchBar = document.getElementById('searchBar');
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-
+    // Ouvrir la page recherche
     openSearchBtn.addEventListener('click', () => {
-      if (searchBar.style.display === 'flex') {
-        searchBar.style.display = 'none';
-      } else {
-        searchBar.style.display = 'flex';
-        searchInput.focus();
+      screens.forEach(s => s.classList.remove('active'));
+      searchPage.classList.add('active');
+      topButtons.classList.add('hidden'); // cacher boutons + et paramètres
+      renderSavedCities();
+      searchInputPage.focus();
+    });
+
+    // Retour à l'accueil depuis la recherche
+    backFromSearchBtn.addEventListener('click', () => {
+      screens.forEach(s => s.classList.remove('active'));
+      homeScreen.classList.add('active');
+      topButtons.classList.remove('hidden'); // réafficher boutons
+      tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
+    });
+
+    // Fonction pour récupérer la météo via API et mettre à jour l'interface
+    async function fetchWeather(city) {
+      try {
+        const apiKey = OPENWEATHERMAP_API_KEY;
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=fr`;
+        const response = await fetch(url);
+        if (!response.ok) {
+          alert("Ville non trouvée ou erreur API.");
+          return;
+        }
+        const data = await response.json();
+
+        // Mise à jour interface
+        loc.textContent = `${data.name}, ${data.sys.country}`;
+        temp.textContent = `${Math.round(data.main.temp)}°C`;
+        desc.textContent = data.weather[0].description;
+
+        // Changement de fond selon météo
+        const mainWeather = data.weather[0].main.toLowerCase();
+        if (mainWeather.includes('cloud')) {
+          bgHome.style.background = 'linear-gradient(to bottom, #636363, #a2ab58)';
+        } else if (mainWeather.includes('rain')) {
+          bgHome.style.background = 'linear-gradient(to bottom, #000046, #1cb5e0)';
+        } else {
+          bgHome.style.background = 'linear-gradient(to bottom, #4facfe, #00f2fe)';
+        }
+
+        // Ajouter la ville à la liste si pas déjà présente
+        const cityName = data.name;
+        if (!savedCities.includes(cityName)) {
+          savedCities.push(cityName);
+        }
+
+        // Rafraîchir liste affichée si sur page recherche
+        if (searchPage.classList.contains('active')) {
+          renderSavedCities();
+        }
+
+      } catch (error) {
+        alert("Erreur lors de la récupération des données météo.");
+        console.error(error);
       }
+    }
+
+    // Recherche déclenchée via bouton OK dans page recherche
+    searchBtnPage.addEventListener('click', () => {
+      const city = searchInputPage.value.trim();
+      if (!city) {
+        alert('Veuillez entrer un nom de ville.');
+        return;
+      }
+      fetchWeather(city).then(() => {
+        // Après recherche, retour à l'écran météo
+        screens.forEach(s => s.classList.remove('active'));
+        homeScreen.classList.add('active');
+        topButtons.classList.remove('hidden');
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.screen === 'home'));
+        searchInputPage.value = '';
+      });
     });
 
-    searchBtn.addEventListener('click', () => {
-      const city = searchInput.value.trim();
-      if (city === '') return;
-
-      fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${apiKey}&units=metric&lang=fr`
-      )
-        .then((response) => {
-          if (!response.ok) throw new Error('Ville non trouvée');
-          return response.json();
-        })
-        .then((data) => {
-          locEl.textContent = `${data.name}, ${data.sys.country}`;
-          tempEl.textContent = `${Math.round(data.main.temp)}°C`;
-          descEl.textContent = data.weather[0].description;
-          humidityValEl.textContent = `${data.main.humidity}%`;
-          updateVigilance(data.main.temp);
-
-          searchBar.style.display = 'none';
-          searchInput.value = '';
-        })
-        .catch((err) => {
-          alert(err.message);
-        });
-    });
-
-    // Optionnel : entrer au clavier déclenche recherche
-    searchInput.addEventListener('keyup', (e) => {
+    // Permet recherche via touche Enter dans input
+    searchInputPage.addEventListener('keyup', (e) => {
       if (e.key === 'Enter') {
-        searchBtn.click();
+        searchBtnPage.click();
       }
     });
+
+    // Init avec une ville par défaut
+    fetchWeather('Paris');
   </script>
 </body>
 </html>
