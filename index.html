@@ -26,7 +26,6 @@
       position: absolute;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      /* transition removed */
       transform: translateX(100%);
       display: flex; flex-direction: column;
     }
@@ -64,14 +63,23 @@
     #loc { font-size: 16px; font-weight: 600; opacity: 0.9; margin-bottom: 4px; }
     .big { font-size: 120px; font-weight: 200; line-height: 1; animation: fadeIn 1s ease; }
     #desc { font-size: 20px; font-weight: 500; margin-top: 8px; padding-left: 4px; }
-    #vigilance {
+
+    /* Nouveau style cases humidité et vent */
+    .info-cards {
       margin-top: 140px;
+      display: flex;
+      gap: 12px;
+    }
+    .info-card {
       padding: 12px 16px;
       background: rgba(255, 255, 255, 0.1);
       border-radius: 12px;
       font-weight: 600;
-      max-width: 90%;
+      min-width: 120px;
+      text-align: center;
+      user-select: none;
     }
+
     #forecastList {
       margin-top: 80px;
       padding-left: 20px;
@@ -216,7 +224,12 @@
         <div id="loc">Ville</div>
         <div class="big" id="temp">--°C</div>
         <div id="desc">Description</div>
-        <div id="vigilance">Vigilance météo...</div>
+
+        <!-- Cases humidité et vent -->
+        <div class="info-cards">
+          <div id="humidity" class="info-card">Humidité: --%</div>
+          <div id="wind" class="info-card">Vent: -- km/h</div>
+        </div>
       </div>
     </section>
 
@@ -240,202 +253,233 @@
 
     <!-- Boutons haut droite -->
     <div id="topButtons">
-      <button id="openSearchBtn" class="btn" title="Ajouter une ville">+</button>
-      <button id="settingsBtn" class="btn" title="Paramètres">
-        <svg class="icon-gear" viewBox="0 0 24 24"><path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8zm6.832 3a6.993 6.993 0 0 0-.62-1.501l2.036-2.036-1.414-1.414-2.036 2.036a6.993 6.993 0 0 0-1.5-.62V4h-2v2.465a6.993 6.993 0 0 0-1.501.62L9.999 4.65 8.585 6.065l2.036 2.036a6.993 6.993 0 0 0-.62 1.5H4v2h2.465a6.993 6.993 0 0 0 .62 1.501L4.65 14.001l1.414 1.414 2.036-2.036a6.993 6.993 0 0 0 1.5.62V20h2v-2.465a6.993 6.993 0 0 0 1.501-.62l2.036 2.036 1.414-1.414-2.036-2.036a6.993 6.993 0 0 0 .62-1.5H20v-2h-1.168z"/></svg>
-      </button>
+      <button id="openSearchBtn" class="btn">+</button>
     </div>
 
-    <!-- Barre du bas avec onglets -->
+    <!-- Barre onglets -->
     <div class="tab-bar">
-      <div class="tab active" data-screen="home">Météo</div>
-      <div class="tab" data-screen="forecast">Prévision</div>
+      <div id="tabHome" class="tab active">Météo</div>
+      <div id="tabForecast" class="tab">Prévisions</div>
     </div>
   </div>
 
   <script>
-    const OPENWEATHERMAP_API_KEY = 'f570ba4a8945e02cc0cdf9bb166d14e1';
+    // API Key OpenWeatherMap (remplace par ta clé)
+    const API_KEY = 'f570ba4a8945e02cc0cdf9bb166d14e1';
 
-    const screens = document.querySelectorAll('.screen');
-    const homeScreen = document.getElementById('home');
-    const forecastScreen = document.getElementById('forecast');
-    const searchPage = document.getElementById('searchPage');
-    const topButtons = document.getElementById('topButtons');
+    // Sélecteurs
+    const screens = {
+      home: document.getElementById('home'),
+      forecast: document.getElementById('forecast'),
+      search: document.getElementById('searchPage'),
+    };
+    const tabs = {
+      home: document.getElementById('tabHome'),
+      forecast: document.getElementById('tabForecast'),
+    };
+    const topButtons = {
+      openSearch: document.getElementById('openSearchBtn'),
+    };
+    const inputs = {
+      search: document.getElementById('searchInputPage'),
+    };
 
-    const openSearchBtn = document.getElementById('openSearchBtn');
-    const settingsBtn = document.getElementById('settingsBtn');
+    // Elements affichage météo
+    const locEl = document.getElementById('loc');
+    const tempEl = document.getElementById('temp');
+    const descEl = document.getElementById('desc');
+    const humidityEl = document.getElementById('humidity');
+    const windEl = document.getElementById('wind');
+    const forecastListEl = document.querySelector('#forecastList ul');
+    const locForecastEl = document.getElementById('locForecast');
 
-    const tabs = document.querySelectorAll('.tab');
+    // Ville courante
+    let currentCity = 'Paris';
 
-    const searchInputPage = document.getElementById('searchInputPage');
-    const loc = document.getElementById('loc');
-    const temp = document.getElementById('temp');
-    const desc = document.getElementById('desc');
-    const vigilance = document.getElementById('vigilance');
-    const locForecast = document.getElementById('locForecast');
-    const forecastList = document.querySelector('#forecastList ul');
-
-    const savedCitiesContainer = document.getElementById('savedCities');
-
-    // Gestion des écrans
-    function showScreen(id) {
-      screens.forEach(s => s.classList.remove('active'));
-      searchPage.classList.remove('active');
-      if (id === 'searchPage') {
-        searchPage.classList.add('active');
-      } else {
-        const screen = document.getElementById(id);
-        if (screen) screen.classList.add('active');
+    // Gestion affichage écran
+    function switchScreen(screenName) {
+      for (const key in screens) {
+        if (key === screenName) {
+          screens[key].classList.add('active');
+        } else {
+          screens[key].classList.remove('active');
+        }
       }
-      // Si on quitte recherche, on remet les boutons visibles
-      if (id !== 'searchPage') {
-        topButtons.style.display = 'flex';
+      for (const key in tabs) {
+        if (key === screenName) {
+          tabs[key].classList.add('active');
+        } else {
+          tabs[key].classList.remove('active');
+        }
       }
     }
 
-    // Onglets bas
-    tabs.forEach(tab => {
-      tab.addEventListener('click', () => {
-        tabs.forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
-        showScreen(tab.dataset.screen);
-        // Cacher page recherche si ouverte
-        searchPage.classList.remove('active');
-      });
-    });
-
-    // Bouton + ouvre recherche, cache + et paramètres
-    openSearchBtn.addEventListener('click', () => {
-      showScreen('searchPage');
-      topButtons.style.display = 'none';
-      searchInputPage.focus();
-      loadSavedCities();
-    });
-
-    // Remplir les villes sauvegardées (localStorage)
-    function loadSavedCities() {
-      let cities = JSON.parse(localStorage.getItem('savedCities')) || [];
-      if (cities.length === 0) {
-        savedCitiesContainer.innerHTML = '<p style="padding:16px; color:#aaa;">Aucune ville sauvegardée</p>';
-        return;
+    // Requête API pour la météo actuelle avec gestion d'erreur détaillée
+    async function fetchCurrentWeather(city) {
+      try {
+        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || 'Erreur inconnue');
+        }
+        const data = await res.json();
+        return data;
+      } catch (error) {
+        throw new Error('Erreur météo actuelle: ' + error.message);
       }
-      let html = '<ul>';
-      cities.forEach(city => {
-        html += `<li data-city="${city}">${city}</li>`;
-      });
-      html += '</ul>';
-      savedCitiesContainer.innerHTML = html;
+    }
 
-      // Clic sur ville sauvegardée : charge météo et revient à l’écran météo
-      savedCitiesContainer.querySelectorAll('li').forEach(li => {
-        li.addEventListener('click', () => {
-          loadWeather(li.dataset.city);
-          showScreen('home');
-          setActiveTab('home');
-          topButtons.style.display = 'flex';
+    // Requête API pour les prévisions 24h par tranche horaire avec gestion d'erreur détaillée
+    async function fetchHourlyForecast(city) {
+      try {
+        // OpenWeatherMap /forecast donne prévisions 3h, on va prendre 8 entrées (24h)
+        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${API_KEY}`;
+        const res = await fetch(url);
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          throw new Error(errData.message || 'Erreur inconnue');
+        }
+        const data = await res.json();
+        return data;
+      } catch (error) {
+        throw new Error('Erreur prévisions: ' + error.message);
+      }
+    }
+
+    // Mise à jour de la météo actuelle à l’écran
+    async function updateCurrentWeather(city) {
+      try {
+        const data = await fetchCurrentWeather(city);
+        locEl.textContent = `${data.name}, ${data.sys.country}`;
+        tempEl.textContent = `${Math.round(data.main.temp)}°C`;
+        descEl.textContent = data.weather[0].description;
+        humidityEl.textContent = `Humidité: ${data.main.humidity}%`;
+        windEl.textContent = `Vent: ${Math.round(data.wind.speed * 3.6)} km/h`; // m/s → km/h
+
+        // Background dynamique simple (exemple)
+        const mainWeather = data.weather[0].main.toLowerCase();
+        let bgColor = '#4facfe'; // default bleu ciel
+        if (mainWeather.includes('rain')) bgColor = '#3a6186';
+        else if (mainWeather.includes('cloud')) bgColor = '#5f6670';
+        else if (mainWeather.includes('clear')) bgColor = '#56ccf2';
+        else if (mainWeather.includes('snow')) bgColor = '#aacce9';
+        document.getElementById('bgHome').style.background = bgColor;
+
+        currentCity = city;
+      } catch (error) {
+        alert(error.message);
+      }
+    }
+
+    // Mise à jour des prévisions 24h
+    async function updateForecast(city) {
+      try {
+        const data = await fetchHourlyForecast(city);
+        locForecastEl.textContent = `Prévisions 24h pour ${data.city.name}, ${data.city.country}`;
+        forecastListEl.innerHTML = '';
+
+        // Prendre max 8 prévisions (24h = 8 x 3h)
+        const list = data.list.slice(0, 8);
+
+        list.forEach(item => {
+          const date = new Date(item.dt * 1000);
+          const hours = date.getHours().toString().padStart(2, '0');
+          const minutes = date.getMinutes().toString().padStart(2, '0');
+
+          const li = document.createElement('li');
+          li.innerHTML = `
+            <span class="time">${hours}h${minutes}</span>
+            <span class="desc">${item.weather[0].description}</span>
+            <span class="temp">${Math.round(item.main.temp)}°C</span>
+          `;
+          forecastListEl.appendChild(li);
         });
-      });
+      } catch (error) {
+        alert(error.message);
+      }
     }
 
-    // Met à jour l'onglet actif (bas)
-    function setActiveTab(id) {
-      tabs.forEach(t => t.classList.remove('active'));
-      const tab = Array.from(tabs).find(t => t.dataset.screen === id);
-      if (tab) tab.classList.add('active');
+    // Recherche ville
+    async function searchCity(city) {
+      if (!city) return;
+      try {
+        await updateCurrentWeather(city);
+        await updateForecast(city);
+        switchScreen('home');
+      } catch (error) {
+        alert('Ville introuvable : ' + error.message);
+      }
     }
 
-    // Recherche avec entrée dans la page recherche
-    searchInputPage.addEventListener('keypress', e => {
+    // Evenements onglets
+    tabs.home.addEventListener('click', () => {
+      switchScreen('home');
+    });
+    tabs.forecast.addEventListener('click', () => {
+      switchScreen('forecast');
+    });
+
+    // Ouvrir page recherche
+    topButtons.openSearch.addEventListener('click', () => {
+      switchScreen('search');
+      inputs.search.focus();
+      showSavedCities();
+    });
+
+    // Recherche à la frappe Enter
+    inputs.search.addEventListener('keypress', e => {
       if (e.key === 'Enter') {
-        const city = searchInputPage.value.trim();
+        const city = inputs.search.value.trim();
         if (city) {
+          searchCity(city);
+          inputs.search.value = '';
           saveCity(city);
-          loadWeather(city);
-          showScreen('home');
-          setActiveTab('home');
-          topButtons.style.display = 'flex';
-          searchInputPage.value = '';
         }
       }
     });
 
-    // Sauvegarder ville dans localStorage
+    // Sauvegarde des villes (localStorage)
+    function getSavedCities() {
+      try {
+        return JSON.parse(localStorage.getItem('savedCities')) || [];
+      } catch {
+        return [];
+      }
+    }
     function saveCity(city) {
-      let cities = JSON.parse(localStorage.getItem('savedCities')) || [];
+      const cities = getSavedCities();
       if (!cities.includes(city)) {
         cities.push(city);
         localStorage.setItem('savedCities', JSON.stringify(cities));
       }
     }
-
-    // Charger météo actuelle (ville)
-    async function loadWeather(city) {
-      try {
-        const url = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${OPENWEATHERMAP_API_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Ville non trouvée');
-        const data = await res.json();
-        updateWeatherUI(data);
-        loadForecast(city); // Charge aussi les prévisions
-      } catch (err) {
-        alert('Erreur météo : ' + err.message);
+    function showSavedCities() {
+      const container = document.getElementById('savedCities');
+      const cities = getSavedCities();
+      if (cities.length === 0) {
+        container.innerHTML = '<p style="color:#aaa;">Aucune ville sauvegardée</p>';
+        return;
       }
-    }
-
-    // Met à jour interface météo
-    function updateWeatherUI(data) {
-      loc.textContent = data.name + ', ' + (data.sys.country || '');
-      temp.textContent = Math.round(data.main.temp) + '°C';
-      desc.textContent = data.weather[0].description;
-      vigilance.textContent = ''; // À adapter si tu veux mettre vigilance
-    }
-
-    // Charger prévisions 24h (3h par 3h) pour la ville
-    async function loadForecast(city) {
-      try {
-        const url = `https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&lang=fr&appid=${OPENWEATHERMAP_API_KEY}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('Prévisions non disponibles');
-        const data = await res.json();
-        locForecast.textContent = `Prévisions 24h pour ${data.city.name}, ${data.city.country}`;
-        updateForecastUI(data.list);
-      } catch (err) {
-        alert('Erreur prévisions : ' + err.message);
-      }
-    }
-
-    // Met à jour liste prévisions
-    function updateForecastUI(list) {
-      forecastList.innerHTML = '';
-      // On affiche max 8 prévisions (3h * 8 = 24h)
-      const maxCount = 8;
-      for (let i = 0; i < maxCount && i < list.length; i++) {
-        const f = list[i];
-        const date = new Date(f.dt * 1000);
-        const h = date.getHours().toString().padStart(2, '0');
-        const m = date.getMinutes().toString().padStart(2, '0');
-        const timeStr = `${h}h${m}`;
-        const desc = f.weather[0].description;
-        const temp = Math.round(f.main.temp);
-        const icon = `https://openweathermap.org/img/wn/${f.weather[0].icon}@2x.png`;
-
+      const ul = document.createElement('ul');
+      cities.forEach(city => {
         const li = document.createElement('li');
-        li.innerHTML = `
-          <div class="time">${timeStr}</div>
-          <div class="desc"><img src="${icon}" alt="${desc}" style="height:32px; vertical-align:middle;"> ${desc}</div>
-          <div class="temp">${temp}°C</div>
-        `;
-        forecastList.appendChild(li);
-      }
+        li.textContent = city;
+        li.addEventListener('click', () => {
+          searchCity(city);
+        });
+        ul.appendChild(li);
+      });
+      container.innerHTML = '';
+      container.appendChild(ul);
     }
 
-    // Au lancement, on charge Paris par défaut
-    loadWeather('Paris');
+    // Initialisation
+    async function init() {
+      await searchCity(currentCity);
+    }
 
-    // Settings bouton : juste alert pour l'instant
-    settingsBtn.addEventListener('click', () => {
-      alert('Paramètres non implémentés pour le moment.');
-    });
+    init();
   </script>
 </body>
 </html>
